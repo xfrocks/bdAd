@@ -1,0 +1,696 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="bdAd" title="[bd] Advertisement" version_string="0.9-dev" version_id="1" url="" install_callback_class="bdAd_Installer" install_callback_method="install" uninstall_callback_class="bdAd_Installer" uninstall_callback_method="uninstall">
+  <admin_navigation>
+    <navigation navigation_id="bdAd" parent_navigation_id="setup" display_order="9999" link="ads" admin_permission_id="bdAd" debug_only="0" hide_no_children="0"/>
+    <navigation navigation_id="bdAd_slots" parent_navigation_id="bdAd" display_order="10" link="ad-slots" admin_permission_id="" debug_only="0" hide_no_children="0"/>
+  </admin_navigation>
+  <admin_permissions>
+    <admin_permission admin_permission_id="bdAd" display_order="9999"/>
+  </admin_permissions>
+  <admin_style_properties/>
+  <admin_templates>
+    <template title="bdad_ad_delete"><![CDATA[<xen:title>{xen:phrase bdad_ad_confirm_deletion}: {$ad.ad_name}</xen:title>
+<xen:h1>{xen:phrase bdad_ad_confirm_deletion}</xen:h1>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:adminlink 'ads/edit', $ad}">{$ad.ad_name}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:require css="delete_confirmation.css" />
+
+<xen:form action="{xen:adminlink 'ads/delete', $ad}" class="deleteConfirmForm formOverlay">
+
+	<p>{xen:phrase bdad_ad_please_confirm}:</p>
+	<strong><a href="{xen:adminlink 'ads/edit', $ad}">{$ad.ad_name}</a></strong>
+
+	<xen:submitunit save="{xen:phrase bdad_ad_delete}" />
+
+	<input type="hidden" name="_xfConfirm" value="1" />
+</xen:form>]]></template>
+    <template title="bdad_ad_edit"><![CDATA[<xen:require js="js/bdAd/editor.js" />
+
+<xen:title>{xen:if '{$ad.ad_id}', '{xen:phrase bdad_ad_edit}', '{xen:phrase bdad_ad_add}'}</xen:title>
+
+<xen:form action="{xen:adminlink 'ads/save'}" class="AutoValidator AdEdit"
+		  data-redirect="yes"
+		  data-select-input-selector="#ctrl_slot_id">
+
+	<xen:checkboxunit label="">
+		<xen:option name="active" value="1" selected="{$ad.active}">{xen:phrase bdad_ad_is_active}</xen:option>
+	</xen:checkboxunit>
+
+	<xen:textboxunit label="{xen:phrase bdad_ad_name}:" name="ad_name" value="{$ad.ad_name}"
+					 hint="{xen:if '!{$ad.ad_id}', {xen:phrase optional}}"
+					 data-liveTitleTemplate="{xen:if {$ad.ad_id},
+						'{xen:phrase bdad_ad_edit}: <em>%s</em>',
+						'{xen:phrase bdad_ad_add}: <em>%s</em>'}" />
+
+	<ul class="tabs Tabs" data-panes="#adPanes > li">
+		<li class="active"><a>{xen:phrase bdad_ad_options}</a></li>
+		<li><a>{xen:phrase bdad_user_targeting}</a></li>
+	</ul>
+	
+	<ul id="adPanes">
+		<li>
+			<xen:textboxunit label="{xen:phrase bdad_ad_title}:" name="_phrases[title]" value="{$ad.phrases.title}"
+							 hint="{xen:phrase optional}" />
+			<xen:textboxunit label="{xen:phrase bdad_ad_description}:" name="_phrases[description]" value="{$ad.phrases.description}"
+							 hint="{xen:phrase optional}" />
+
+			<xen:selectunit label="{xen:phrase bdad_slot}:" name="slot_id" value="{$ad.slot_id}"
+							data-options-selector="#adOptions"
+							data-options-url="{xen:adminlink ads/options}">
+				<xen:options source="$listSlot" />
+			</xen:selectunit>
+			<div id="adOptions">
+				<xen:include template="bdad_ad_options" />
+			</div>
+		</li>
+		<li>
+			<xen:include template="helper_criteria_user" />
+			<xen:include template="helper_criteria_user_date">
+				<xen:set var="$noDateFields">1</xen:set>
+			</xen:include>
+			<xen:include template="helper_criteria_user_field" />
+		</li>
+	</ul>
+
+	<xen:submitunit save="{xen:phrase bdad_ad_save}">
+		<input type="button" name="delete" value="{xen:phrase bdad_ad_delete}"
+			accesskey="d" class="button OverlayTrigger"
+			data-href="{xen:adminlink 'ads/delete', $ad}"
+			{xen:if '!{$ad.ad_id}', 'style="display: none"'}
+		/>
+	</xen:submitunit>
+
+	<input type="hidden" name="ad_id" value="{$ad.ad_id}" />
+</xen:form>
+
+<xen:edithint template="bdad_ad_options__link" />
+<xen:edithint template="bdad_ad_options__slot_options_forumIds" />
+<xen:edithint template="bdad_ad_options__slot_options_search" />
+<xen:edithint template="bdad_ad_options__slot_options_username" />
+<xen:edithint template="bdad_ad_options__upload" />
+<xen:edithint template="bdad_ad_options_post" />
+<xen:edithint template="bdad_ad_options_thread" />]]></template>
+    <template title="bdad_ad_list"><![CDATA[<xen:title>{xen:phrase bdad_ads}</xen:title>
+
+<xen:topctrl>
+	<a href="{xen:adminlink 'ads/add'}" class="button" accesskey="a">+ {xen:phrase bdad_ad_add}</a>
+</xen:topctrl>
+
+<xen:require css="filter_list.css" />
+<xen:require js="js/xenforo/filter_list.js" />
+
+<xen:form action="{xen:adminlink 'ads/toggle'}" class="section">
+	<xen:if is="{$adsGrouped}">
+		<h2 class="subHeading">
+			<xen:include template="filter_list_controls" />
+			{xen:phrase bdad_ads}
+		</h2>
+
+		<ul class="FilterList Scrollable">
+			<xen:include template="bdad_ad_list_grouped" />
+			<xen:edithint template="bdad_ad_list_items" />
+			<xen:edithint template="bdad_ad_list_items_slot_disabled" />
+		</ul>
+
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $ads}</span>', 'total={xen:count $ads}'}</p>
+	<xen:else />
+		<div class="noResults">{xen:phrase bdad_ad_no_results}</div>
+	</xen:if>
+</xen:form>]]></template>
+    <template title="bdad_ad_list_grouped"><![CDATA[<xen:foreach loop="$slots" key="$slotId" value="$slot">
+	<li>
+		<h3 class="textHeading" id="{xen:helper listitemid, 'slot_{$slotId}'}">{$slot.slot_name}{xen:if '!{$slot.active}', ' ({xen:phrase disabled})'}
+			<a href="{xen:adminlink 'ads/add', '', 'slot_id={$slotId}'}" class="add controls"><span>{xen:phrase bdad_ad_add_short}</span></a>
+		</h3>
+		<xen:if is="{$adsGrouped.{$slotId}}">
+			<ol>
+				<xen:if is="{$slot.active}">
+					<xen:include template="bdad_ad_list_items">
+						<xen:map from="$adsGrouped.{$slotId}" to="$ads" />
+					</xen:include>
+				<xen:else />
+					<xen:include template="bdad_ad_list_items_slot_disabled">
+						<xen:map from="$adsGrouped.{$slotId}" to="$ads" />
+					</xen:include>
+				</xen:if>
+			</ol>
+		</xen:if>
+	</li>
+</xen:foreach>]]></template>
+    <template title="bdad_ad_list_items"><![CDATA[<xen:foreach loop="$ads" value="$ad">
+	<xen:listitem
+		id="{$ad.ad_id}"
+		href="{xen:adminlink 'ads/edit', $ad}"
+		delete="{xen:adminlink 'ads/delete', $ad}"
+		toggle="{$ad.active}"
+		toggletitle="{xen:phrase enable_disable_x, 'title={$ad.ad_name}'}">
+		<xen:label>{$ad.ad_name}</xen:label>
+		<xen:snippet>
+			{$ad.phrases.title}
+			/ {xen:phrase bdad_x_views, 'count={xen:number $ad.view_count, 0}'}
+			/ {xen:phrase bdad_x_clicks, 'count={xen:number $ad.click_count, 0}'}
+		</xen:snippet>
+		<xen:popup title="{xen:phrase controls}" ctrlclass="toolsCtrl">
+			<xen:link href="{xen:adminlink 'ads/disable', $ad, '_xfToken={$visitor.csrf_token_page}'}" displayif="{$ad.active}">{xen:phrase disable}</xen:link>
+			<xen:link href="{xen:adminlink 'ads/enable', $ad, '_xfToken={$visitor.csrf_token_page}'}" displayif="!{$ad.active}">{xen:phrase enable}</xen:link>
+			<xen:link href="{xen:adminlink 'ads/delete', $ad}">{xen:phrase delete}</xen:link>
+			<xen:link href="{xen:adminlink 'ads/edit', $ad}">{xen:phrase edit}</xen:link>
+		</xen:popup>
+	</xen:listitem>
+</xen:foreach>]]></template>
+    <template title="bdad_ad_list_items_slot_disabled"><![CDATA[<xen:foreach loop="$ads" value="$ad">
+	<xen:listitem
+		id="{$ad.ad_id}"
+		labelclass="disabled"
+		href="{xen:adminlink 'ads/edit', $ad}"
+		delete="{xen:adminlink 'ads/delete', $ad}">
+		<xen:label>{$ad.ad_name}</xen:label>
+		<xen:snippet>
+			{$ad.phrases.title}
+			/ {xen:phrase bdad_x_views, 'count={xen:number $ad.view_count, 0}'}
+			/ {xen:phrase bdad_x_clicks, 'count={xen:number $ad.click_count, 0}'}
+		</xen:snippet>
+		<xen:popup title="{xen:phrase controls}" ctrlclass="toolsCtrl">
+			<xen:link href="{xen:adminlink 'ad-slots/enable', $slot, '_xfToken={$visitor.csrf_token_page}'}">{xen:phrase bdad_enable_slot}</xen:link>
+			<xen:link href="{xen:adminlink 'ads/delete', $ad}">{xen:phrase delete}</xen:link>
+			<xen:link href="{xen:adminlink 'ads/edit', $ad}">{xen:phrase edit}</xen:link>
+		</xen:popup>
+	</xen:listitem>
+</xen:foreach>]]></template>
+    <template title="bdad_ad_options"><![CDATA[<xen:if hascontent="true">
+	<fieldset>
+		<xen:contentcheck>
+			{xen:raw $adOptions}
+		</xen:contentcheck>
+	</fieldset>
+</xen:if>
+
+<input type="hidden" name="ad_options_slot_id" value="{$ad.slot_id}" />]]></template>
+    <template title="bdad_ad_options_post"><![CDATA[<div class="baseHtml">
+	<ul>
+		<xen:include template="bdad_ad_options__slot_options_forumIds" />
+		<xen:include template="bdad_ad_options__slot_options_search" />
+		<li>{xen:phrase bdad_post_index}: {xen:number $slot.slot_options.postIndex, 0}</li>
+		<xen:include template="bdad_ad_options__slot_options_username" />
+	</ul>
+</div>
+
+<xen:include template="bdad_ad_options__link" />
+
+<xen:include template="bdad_ad_options__upload">
+	<xen:set var="$optionKey">avatar</xen:set>
+	<xen:set var="$label">{xen:phrase avatar}</xen:set>
+	<xen:set var="$hint">{xen:phrase optional}</xen:set>
+</xen:include>]]></template>
+    <template title="bdad_ad_options_thread"><![CDATA[<div class="baseHtml">
+	<ul>
+		<xen:include template="bdad_ad_options__slot_options_forumIds" />
+		<xen:include template="bdad_ad_options__slot_options_search" />
+		<li>{xen:phrase bdad_thread_index}: {xen:number $slot.slot_options.threadIndex, 0}</li>
+	</ul>
+</div>
+
+<xen:include template="bdad_ad_options__link" />
+
+<xen:include template="bdad_ad_options__upload">
+	<xen:set var="$optionKey">avatar</xen:set>
+	<xen:set var="$label">{xen:phrase avatar}</xen:set>
+	<xen:set var="$hint">{xen:phrase optional}</xen:set>
+</xen:include>]]></template>
+    <template title="bdad_ad_options__link"><![CDATA[<xen:textboxunit label="{xen:phrase bdad_link}:" name="ad_options[link]" value="{$ad.ad_options.link}"
+				 placeholder="https://www.google.com/" />]]></template>
+    <template title="bdad_ad_options__slot_options_forumIds"><![CDATA[<xen:if hascontent="true">
+	<li>
+		{xen:phrase bdad_enabled_forums}:
+		<ul>
+			<xen:contentcheck>
+				<xen:foreach loop="$slotOptionsForums" value="$forum">
+					<li>
+						<a href="{xen:link forums, $forum}" tabindex="-1" target="_blank">
+							{$forum.title}
+						</a>
+					</li>
+				</xen:foreach>
+			</xen:contentcheck>
+		</ul>
+	</li>
+<xen:else />
+	<li>
+		{xen:phrase bdad_enabled_forums}: {xen:phrase all_forums}
+	</li>
+</xen:if>]]></template>
+    <template title="bdad_ad_options__slot_options_search"><![CDATA[<li>{xen:phrase bdad_serve_in_search}: {xen:if '{$slot.slot_options.search}', {xen:phrase yes}, {xen:phrase no}}</li>]]></template>
+    <template title="bdad_ad_options__slot_options_username"><![CDATA[<xen:if is="{$slot.slot_options.username}">
+	<li>{xen:phrase user_name}: {$slot.slot_options.username}</li>
+<xen:else />
+	<li>
+		{xen:phrase user_name}: {xen:phrase bdad_username}<xen:if hascontent="true">. {xen:phrase bdad_translations}:
+			<xen:contentcheck>
+				<xen:foreach loop="$usernamePhrases" value="$usernamePhrase">
+					<a href="{$usernamePhrase.link}" tabindex="-1" target="_blank">{$usernamePhrase.title}</a>
+				</xen:foreach>
+			</xen:contentcheck>
+		</xen:if>
+	</li>
+</xen:if>]]></template>
+    <template title="bdad_ad_options__upload"><![CDATA[<xen:controlunit label="{$label}:" hint="{$hint}">
+	<xen:html>
+		<xen:if is="{$ad.attachments.{$optionKey}.thumbnailUrl}">
+			<img src="{$ad.attachments.{$optionKey}.thumbnailUrl}" /><br />
+		</xen:if>
+		
+		<xen:if is="{$ad.ad_options.upload.{$optionKey}}">
+			<input type="hidden" name="ad_options[upload][{$optionKey}]"
+				   value="{$ad.ad_options.upload.{$optionKey}}" />
+			<xen:checkbox>
+				<xen:option name="delete_upload[{$optionKey}]" value="{$ad.ad_options.upload.{$optionKey}}">
+					{xen:phrase delete}
+				</xen:option>
+			</xen:checkbox>
+		</xen:if>
+		
+		<xen:if is="{$ad.ad_id} > 0">
+			<a href="{xen:adminlink ads/upload, $ad,
+					 'slot_id={$ad.slot_id}',
+					 'option_key={$optionKey}'}" class="OverlayTrigger">{xen:phrase upload_file}</a>
+		<xen:else />
+			{xen:phrase bdad_save_then_edit_to_upload_file}
+		</xen:if>
+	</xen:html>
+</xen:controlunit>]]></template>
+    <template title="bdad_slot_delete"><![CDATA[<xen:title>{xen:phrase bdad_slot_confirm_deletion}: {$slot.slot_name}</xen:title>
+<xen:h1>{xen:phrase bdad_slot_confirm_deletion}</xen:h1>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:adminlink 'ad-slots/edit', $slot}">{$slot.slot_name}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:require css="delete_confirmation.css" />
+
+<xen:form action="{xen:adminlink 'ad-slots/delete', $slot}" class="deleteConfirmForm formOverlay">
+
+	<p>{xen:phrase bdad_slot_please_confirm}:</p>
+	<strong><a href="{xen:adminlink 'ad-slots/edit', $slot}">{$slot.slot_name}</a></strong>
+
+	<xen:submitunit save="{xen:phrase bdad_slot_delete}" />
+
+	<input type="hidden" name="_xfConfirm" value="1" />
+</xen:form>]]></template>
+    <template title="bdad_slot_edit"><![CDATA[<xen:require js="js/bdAd/editor.js" />
+
+<xen:title>{xen:if '{$slot.slot_id}', '{xen:phrase bdad_slot_edit}', '{xen:phrase bdad_slot_add}'}</xen:title>
+
+<xen:form action="{xen:adminlink 'ad-slots/save'}" class="AutoValidator SlotEdit"
+		  data-redirect="yes"
+		  data-select-input-selector="#ctrl_slot_class">
+
+	<xen:checkboxunit label="">
+		<xen:option name="active" value="1" selected="{$slot.active}">{xen:phrase bdad_slot_is_active}</xen:option>
+	</xen:checkboxunit>
+
+	<xen:textboxunit label="{xen:phrase bdad_slot_name}:" name="slot_name" value="{$slot.slot_name}"
+					 hint="{xen:if '!{$slot.slot_id}', {xen:phrase optional}}"
+					 data-liveTitleTemplate="{xen:if {$slot.slot_id},
+						'{xen:phrase bdad_slot_edit}: <em>%s</em>',
+						'{xen:phrase bdad_slot_add}: <em>%s</em>'}" />
+
+	<xen:selectunit label="{xen:phrase bdad_slot_class}:" name="slot_class" value="{$slot.slot_class}"
+					data-options-selector="#slotOptions"
+					data-options-url="{xen:adminlink ad-slots/options}">
+		<xen:options source="$slotClasses" />
+	</xen:selectunit>
+	<div id="slotOptions">
+		<xen:include template="bdad_slot_options" />
+	</div>
+
+	<xen:submitunit save="{xen:phrase bdad_slot_save}">
+		<input type="button" name="delete" value="{xen:phrase bdad_slot_delete}"
+			accesskey="d" class="button OverlayTrigger"
+			data-href="{xen:adminlink 'ad-slots/delete', $slot}"
+			{xen:if '!{$slot.slot_id}', 'style="display: none"'}
+		/>
+	</xen:submitunit>
+
+	<input type="hidden" name="slot_id" value="{$slot.slot_id}" />
+</xen:form>
+
+<xen:edithint template="bdad_slot_options__forumIds" />
+<xen:edithint template="bdad_slot_options__search" />
+<xen:edithint template="bdad_slot_options__username" />
+<xen:edithint template="bdad_slot_options_post" />
+<xen:edithint template="bdad_slot_options_thread" />]]></template>
+    <template title="bdad_slot_list"><![CDATA[<xen:title>{xen:phrase bdad_slots}</xen:title>
+
+<xen:topctrl>
+	<a href="{xen:adminlink 'ad-slots/add'}" class="button" accesskey="a">+ {xen:phrase bdad_slot_add}</a>
+</xen:topctrl>
+
+<xen:require css="filter_list.css" />
+<xen:require js="js/xenforo/filter_list.js" />
+
+<xen:form action="{xen:adminlink 'ad-slots/toggle'}" class="section">
+	<xen:if is="{$slots}">
+		<h2 class="subHeading">
+			<xen:include template="filter_list_controls" />
+			{xen:phrase bdad_slots}
+		</h2>
+
+		<ol class="FilterList Scrollable">
+			<xen:include template="bdad_slot_list_items" />
+		</ol>
+
+		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $slots}</span>', 'total={xen:count $slots}'}</p>
+	<xen:else />
+		<div class="noResults">{xen:phrase bdad_slot_no_results}</div>
+	</xen:if>
+</xen:form>]]></template>
+    <template title="bdad_slot_list_items"><![CDATA[<xen:foreach loop="$slots" value="$slot">
+	<xen:listitem
+		id="{$slot.slot_id}"
+		href="{xen:adminlink 'ad-slots/edit', $slot}"
+		delete="{xen:adminlink 'ad-slots/delete', $slot}"
+		toggle="{$slot.active}"
+		toggletitle="{xen:phrase enable_disable_x, 'title={$slot.slot_name}'}">
+		<xen:label>{$slot.slot_name}</xen:label>
+		<xen:snippet>
+			{$slotClassTitles.{$slot.slot_class}}
+		</xen:snippet>
+		<xen:popup title="{xen:phrase controls}" ctrlclass="toolsCtrl">
+			<xen:link href="{xen:adminlink 'ad-slots/disable', $slot, '_xfToken={$visitor.csrf_token_page}'}" displayif="{$slot.active}">{xen:phrase disable}</xen:link>
+			<xen:link href="{xen:adminlink 'ad-slots/enable', $slot, '_xfToken={$visitor.csrf_token_page}'}" displayif="!{$slot.active}">{xen:phrase enable}</xen:link>
+			<xen:link href="{xen:adminlink 'ad-slots/delete', $slot}">{xen:phrase delete}</xen:link>
+			<xen:link href="{xen:adminlink 'ad-slots/edit', $slot}">{xen:phrase edit}</xen:link>
+		</xen:popup>
+	</xen:listitem>
+</xen:foreach>]]></template>
+    <template title="bdad_slot_options"><![CDATA[<xen:if hascontent="true">
+	<fieldset>
+		<xen:contentcheck>
+			{xen:raw $slotOptions}
+		</xen:contentcheck>
+	</fieldset>
+</xen:if>
+
+<input type="hidden" name="slot_options_class" value="{$slot.slot_class}" />]]></template>
+    <template title="bdad_slot_options_post"><![CDATA[<xen:include template="bdad_slot_options__forumIds" />
+
+<xen:include template="bdad_slot_options__search" />
+
+<xen:spinboxunit label="{xen:phrase bdad_post_index}:" name="slot_options[postIndex]" value="{$slot.slot_options.postIndex}"
+				 min="0" max="{$xenOptions.messagesPerPage}"
+				 explain="{xen:phrase bdad_post_index_explain}" />
+
+<xen:textboxunit label="{xen:phrase bdad_sponsored_text_label}:" name="slot_options[sponsoredText]" value="{$slot.slot_options.sponsoredText}"
+				 placeholder="{xen:phrase bdad_sponsored_text}"
+				 hint="{xen:phrase optional}"
+				 explain="{xen:phrase bdad_sponsored_text_explain, 'phrase={xen:phrase bdad_sponsored_text}'}" />
+
+<xen:include template="bdad_slot_options__username" />]]></template>
+    <template title="bdad_slot_options_thread"><![CDATA[<xen:include template="bdad_slot_options__forumIds" />
+
+<xen:include template="bdad_slot_options__search" />
+
+<xen:spinboxunit label="{xen:phrase bdad_thread_index}:" name="slot_options[threadIndex]" value="{$slot.slot_options.threadIndex}"
+				 min="0" max="{$xenOptions.discussionsPerPage}"
+				 explain="{xen:phrase bdad_thread_index_explain}" />
+
+<xen:textboxunit label="{xen:phrase bdad_sponsored_text_label}:" name="slot_options[sponsoredText]" value="{$slot.slot_options.sponsoredText}"
+				 placeholder="{xen:phrase bdad_sponsored_text}"
+				 hint="{xen:phrase optional}"
+				 explain="{xen:phrase bdad_sponsored_text_explain, 'phrase={xen:phrase bdad_sponsored_text}'}" />]]></template>
+    <template title="bdad_slot_options__forumIds"><![CDATA[<xen:selectunit label="{xen:phrase forums}:" name="slot_options[forumIds]" multiple="true"
+				explain="{xen:phrase bdad_slot_options_forum_ids_explain}">
+	<xen:options source="$forums" />
+</xen:selectunit>]]></template>
+    <template title="bdad_slot_options__search"><![CDATA[<xen:checkboxunit label="">
+	<xen:option name="slot_options[search]" value="1" selected="{$slot.slot_options.search}">
+		{xen:phrase bdad_slot_options_search_toggle}
+	</xen:option>
+</xen:checkboxunit>]]></template>
+    <template title="bdad_slot_options__username"><![CDATA[<xen:textboxunit label="{xen:phrase user_name}:" name="slot_options[username]" value="{$slot.slot_options.username}"
+				 placeholder="{xen:phrase bdad_username}"
+				 hint="{xen:phrase optional}"
+				 explain="{xen:phrase bdad_slot_options_username_explain, 'phrase={xen:phrase bdad_username}'}" />]]></template>
+  </admin_templates>
+  <admin_template_modifications/>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="file_health_check" execute_order="10" callback_class="bdAd_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
+    <listener event_id="init_dependencies" execute_order="10" callback_class="bdAd_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
+    <listener event_id="load_class_view" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
+    <listener event_id="template_hook" execute_order="10" callback_class="bdAd_Engine" callback_method="onTemplateHook" active="1" hint="bdad_hook" description="bdAd_Engine::onTemplateHook($hookName=bdad_hook,...)"/>
+  </code_event_listeners>
+  <cron>
+    <entry entry_id="bdAd_Log_runHourly" cron_class="bdAd_CronEntry_Log" cron_method="runHourly" active="1"><![CDATA[{"day_type":"dom","dom":["-1"],"hours":["-1"],"minutes":["6"]}]]></entry>
+  </cron>
+  <email_templates/>
+  <email_template_modifications/>
+  <optiongroups/>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="admin_navigation_bdAd" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement]]></phrase>
+    <phrase title="admin_navigation_bdAd_slots" version_id="1" version_string="0.9-dev"><![CDATA[Ad Slots]]></phrase>
+    <phrase title="admin_permission_bdAd" version_id="1" version_string="0.9-dev"><![CDATA[Manage advertisements]]></phrase>
+    <phrase title="bdad_ad" version_id="1" version_string="0.9-dev"><![CDATA[Advertisement]]></phrase>
+    <phrase title="bdad_ads" version_id="1" version_string="0.9-dev"><![CDATA[Ads]]></phrase>
+    <phrase title="bdad_ad_add" version_id="1" version_string="0.9-dev"><![CDATA[Add New Ad]]></phrase>
+    <phrase title="bdad_ad_add_short" version_id="1" version_string="0.9-dev"><![CDATA[+Ad]]></phrase>
+    <phrase title="bdad_ad_confirm_deletion" version_id="1" version_string="0.9-dev"><![CDATA[Confirm Deletion of Ad]]></phrase>
+    <phrase title="bdad_ad_delete" version_id="1" version_string="0.9-dev"><![CDATA[Delete Ad]]></phrase>
+    <phrase title="bdad_ad_description" version_id="1" version_string="0.9-dev"><![CDATA[Description]]></phrase>
+    <phrase title="bdad_ad_edit" version_id="1" version_string="0.9-dev"><![CDATA[Edit Ad]]></phrase>
+    <phrase title="bdad_ad_is_active" version_id="1" version_string="0.9-dev"><![CDATA[Ad is active]]></phrase>
+    <phrase title="bdad_ad_name" version_id="1" version_string="0.9-dev"><![CDATA[Ad Name]]></phrase>
+    <phrase title="bdad_ad_not_found" version_id="1" version_string="0.9-dev"><![CDATA[The requested ad could not be found]]></phrase>
+    <phrase title="bdad_ad_no_results" version_id="1" version_string="0.9-dev"><![CDATA[No ad could be found...]]></phrase>
+    <phrase title="bdad_ad_options" version_id="1" version_string="0.9-dev"><![CDATA[Ad Options]]></phrase>
+    <phrase title="bdad_ad_options_cannot_verified" version_id="1" version_string="0.9-dev"><![CDATA[Ad options cannot be verified.]]></phrase>
+    <phrase title="bdad_ad_options_error_link_required" version_id="1" version_string="0.9-dev"><![CDATA[Link is required and must be a valid URL.]]></phrase>
+    <phrase title="bdad_ad_please_confirm" version_id="1" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following ad]]></phrase>
+    <phrase title="bdad_ad_save" version_id="1" version_string="0.9-dev"><![CDATA[Save Ad]]></phrase>
+    <phrase title="bdad_ad_title" version_id="1" version_string="0.9-dev"><![CDATA[Title]]></phrase>
+    <phrase title="bdad_ad_x" version_id="1" version_string="0.9-dev"><![CDATA[Ad #{number}]]></phrase>
+    <phrase title="bdad_enabled_forums" version_id="1" version_string="0.9-dev"><![CDATA[Enabled Forums]]></phrase>
+    <phrase title="bdad_enable_slot" version_id="1" version_string="0.9-dev"><![CDATA[Enable Slot]]></phrase>
+    <phrase title="bdad_link" version_id="1" version_string="0.9-dev"><![CDATA[Link]]></phrase>
+    <phrase title="bdad_post_index" version_id="1" version_string="0.9-dev"><![CDATA[Post Index]]></phrase>
+    <phrase title="bdad_post_index_explain" version_id="1" version_string="0.9-dev"><![CDATA[Select position (in post list, search result list) below which ads will be served. Please note that index starts from 0 (zero).
+]]></phrase>
+    <phrase title="bdad_save_then_edit_to_upload_file" version_id="1" version_string="0.9-dev"><![CDATA[Save the ad then edit it to upload file.]]></phrase>
+    <phrase title="bdad_serve_in_search" version_id="1" version_string="0.9-dev"><![CDATA[Serve ads in search]]></phrase>
+    <phrase title="bdad_slot" version_id="1" version_string="0.9-dev"><![CDATA[Slot]]></phrase>
+    <phrase title="bdad_slots" version_id="1" version_string="0.9-dev"><![CDATA[Slots]]></phrase>
+    <phrase title="bdad_slot_add" version_id="1" version_string="0.9-dev"><![CDATA[Add New Slot]]></phrase>
+    <phrase title="bdad_slot_class" version_id="1" version_string="0.9-dev"><![CDATA[Slot Class]]></phrase>
+    <phrase title="bdad_slot_confirm_deletion" version_id="1" version_string="0.9-dev"><![CDATA[Confirm Deletion of Slot]]></phrase>
+    <phrase title="bdad_slot_delete" version_id="1" version_string="0.9-dev"><![CDATA[Delete Slot]]></phrase>
+    <phrase title="bdad_slot_edit" version_id="1" version_string="0.9-dev"><![CDATA[Edit Slot]]></phrase>
+    <phrase title="bdad_slot_is_active" version_id="1" version_string="0.9-dev"><![CDATA[Slot is active]]></phrase>
+    <phrase title="bdad_slot_name" version_id="1" version_string="0.9-dev"><![CDATA[Slot Name]]></phrase>
+    <phrase title="bdad_slot_not_found" version_id="1" version_string="0.9-dev"><![CDATA[The requested slot could not be found]]></phrase>
+    <phrase title="bdad_slot_no_results" version_id="1" version_string="0.9-dev"><![CDATA[No slot could be found...]]></phrase>
+    <phrase title="bdad_slot_options_cannot_verified" version_id="1" version_string="0.9-dev"><![CDATA[Slot options cannot be verified.]]></phrase>
+    <phrase title="bdad_slot_options_forum_ids_explain" version_id="1" version_string="0.9-dev"><![CDATA[Select forums in which ads should be served. Select none to enable ads for all forums.]]></phrase>
+    <phrase title="bdad_slot_options_search_toggle" version_id="1" version_string="0.9-dev"><![CDATA[Check this box to serve ads in search results page]]></phrase>
+    <phrase title="bdad_slot_options_username_explain" version_id="1" version_string="0.9-dev"><![CDATA[Enter custom username to serve ads with. Left blank to use the phrase bdad_username ("{phrase}").]]></phrase>
+    <phrase title="bdad_slot_please_confirm" version_id="1" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following slot]]></phrase>
+    <phrase title="bdad_slot_post" version_id="1" version_string="0.9-dev"><![CDATA[Promoted Post]]></phrase>
+    <phrase title="bdad_slot_save" version_id="1" version_string="0.9-dev"><![CDATA[Save Slot]]></phrase>
+    <phrase title="bdad_slot_thread" version_id="1" version_string="0.9-dev"><![CDATA[Promoted Thread]]></phrase>
+    <phrase title="bdad_slot_x" version_id="1" version_string="0.9-dev"><![CDATA[Ad Slot #{number}]]></phrase>
+    <phrase title="bdad_sponsored_text" global_cache="1" version_id="1" version_string="0.9-dev"><![CDATA[Sponsored]]></phrase>
+    <phrase title="bdad_sponsored_text_explain" version_id="1" version_string="0.9-dev"><![CDATA[Enter custom sponsored text if any. Left blank to use the phrase bdad_sponsored_text ("{phrase}").]]></phrase>
+    <phrase title="bdad_sponsored_text_label" version_id="1" version_string="0.9-dev"><![CDATA[Sponsored Text]]></phrase>
+    <phrase title="bdad_thread_index" version_id="1" version_string="0.9-dev"><![CDATA[Thread Index]]></phrase>
+    <phrase title="bdad_thread_index_explain" version_id="1" version_string="0.9-dev"><![CDATA[Select position (in thread list, search result list) below which ads will be served. Please note that index starts from 0 (zero).]]></phrase>
+    <phrase title="bdad_translations" version_id="1" version_string="0.9-dev"><![CDATA[Translations]]></phrase>
+    <phrase title="bdad_username" version_id="1" version_string="0.9-dev"><![CDATA[Advertisement]]></phrase>
+    <phrase title="bdad_user_targeting" version_id="1" version_string="0.9-dev"><![CDATA[User Targeting]]></phrase>
+    <phrase title="bdad_x_clicks" version_id="1" version_string="0.9-dev"><![CDATA[{count} clicks]]></phrase>
+    <phrase title="bdad_x_views" version_id="1" version_string="0.9-dev"><![CDATA[{count} views]]></phrase>
+    <phrase title="cron_entry_bdAd_Log_runHourly" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement: Aggregate Logs Hourly]]></phrase>
+  </phrases>
+  <route_prefixes>
+    <route_type type="admin">
+      <prefix original_prefix="ad-slots" class="bdAd_Route_PrefixAdmin_Slot" build_link="data_only"/>
+      <prefix original_prefix="ads" class="bdAd_Route_PrefixAdmin_Ad" build_link="data_only"/>
+    </route_type>
+  </route_prefixes>
+  <style_properties/>
+  <templates>
+    <template title="bdad.css" version_id="1" version_string="0.9-dev"><![CDATA[.discussionListItem.adAsThread .listBlock { background-color: #ffffec; }
+.discussionList .adAsThread .lastPost { text-align: center; }
+.adAsThread .lastPost > span {
+	background: #efc439;
+	border-radius: 2px;
+	color: #fff;
+	font-size: 13px;
+	line-height: 30px;
+	padding: 4px 8px;
+	text-transform: uppercase;
+}
+
+.searchResult.adAsThread { background-color: #ffffec; }
+.searchResult.adAsThread .avatar img { max-width: 48px; max-height: 48px; }
+
+.searchResult.adAsPost { background-color: #ffffec; }
+.searchResult.adAsPost .avatar img { max-width: 48px; max-height: 48px; }
+]]></template>
+    <template title="bdad_post" version_id="1" version_string="0.9-dev"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Post,
+	post, $forum, $thread, $post}</xen:set>
+<xen:if is="{$adIds}">
+	<xen:require css="bdad.css" />
+
+	<xen:hook name="bdad_hook" params="{xen:array 'slotClass=bdAd_Slot_Post', 'adIds={$adIds}'}">
+		<li id="{$messageId}" class="message adAsPost" data-ids="{$adIds}">
+
+			<div class="messageUserInfo">
+				<div class="messageUserBlock {xen:if $user.isOnline, online}">
+					<div class="avatarHolder">
+						<span class="helper"></span>
+						<a href="{link}" rel="nofollow" class="avatar NoOverlay">
+							<img src="{avatarUrl}" />
+						</a>
+					</div>
+
+					<h3 class="userText">
+						<a href="{link}" rel="nofollow" class="username NoOverlay">{username}</a>
+					</h3>
+
+					<span class="arrow"><span></span></span>
+				</div>
+			</div>
+
+			<div class="messageInfo primaryContent">
+				<div class="messageContent">		
+					<article>
+						<blockquote class="messageText SelectQuoteContainer ugc baseHtml">
+							<h3>{title}</h3>
+							{description}
+							<div class="messageTextEndMarker">&nbsp;</div>
+						</blockquote>
+					</article>
+				</div>
+
+				<xen:if is="{$visitor.content_show_signature} && {$message.signature}">
+					<div class="baseHtml signature messageText ugc"><aside>{sponsoredText}</aside></div>
+				</xen:if>
+			</div>
+		</li>
+	</xen:hook>
+</xen:if>
+
+<xen:edithint template="post" />
+<xen:edithint template="message" />
+<xen:edithint template="message_user_info" />]]></template>
+    <template title="bdad_search_result_post" version_id="1" version_string="0.9-dev"><![CDATA[<xen:require css="bdad.css" />
+
+<li class="searchResult post primaryContent adAsPost" data-ids="{$adIds}">
+
+	<div class="listBlock posterAvatar">
+		<a href="{link}" rel="nofollow" class="avatar NoOverlay">
+			<img src="{avatarUrl}" />
+		</a>
+	</div>
+
+	<div class="listBlock main">
+		<div class="titleText">
+			<span class="contentType">{sponsoredText}</span>
+			<h3 class="title"><a href="{link}" rel="nofollow">{title}</a></h3>
+		</div>
+
+		<blockquote class="snippet">
+			{description}
+		</blockquote>
+	</div>
+</li>
+
+<xen:edithint template="search_result_post" />]]></template>
+    <template title="bdad_search_result_thread" version_id="1" version_string="0.9-dev"><![CDATA[<xen:require css="bdad.css" />
+
+<li class="searchResult thread primaryContent adAsThread" data-ids="{$adIds}">
+
+	<div class="listBlock posterAvatar">
+		<a href="{link}" rel="nofollow" class="avatar NoOverlay">
+			<img src="{avatarUrl}" />
+		</a>
+	</div>
+
+	<div class="listBlock main">
+		<div class="titleText">
+			<span class="contentType">{sponsoredText}</span>
+			<h3 class="title"><a href="{link}" rel="nofollow">{title}</a></h3>
+		</div>
+
+		<blockquote class="snippet">
+			{description}
+		</blockquote>
+	</div>
+
+</li>
+
+<xen:edithint template="search_result_thread" />]]></template>
+    <template title="bdad_thread_list_item" version_id="1" version_string="0.9-dev"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Thread,
+	thread_list_item, $forum, $thread}</xen:set>
+<xen:if is="{$adIds}">
+	<xen:require css="bdad.css" />
+
+	<xen:hook name="bdad_hook" params="{xen:array 'slotClass=bdAd_Slot_Thread', 'adIds={$adIds}'}">
+		<li class="discussionListItem adAsThread" data-ids="{$adIds}">
+
+			<div class="listBlock posterAvatar">
+				<span class="avatarContainer">
+					<a href="{link}" rel="nofollow" class="avatar NoOverlay">
+						<img src="{avatarUrl}" />
+					</a>
+				</span>
+			</div>
+
+			<div class="listBlock main">
+				<div class="titleText">
+					<h3 class="title">
+						<a href="{link}" rel="nofollow">{title}</a>
+					</h3>
+
+					<div class="secondRow">
+						<div class="posterDate muted">
+							{description}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="listBlock lastPost">
+				<span>{sponsoredText}</span>
+			</div>
+		</li>
+	</xen:hook>
+</xen:if>
+
+<xen:edithint template="thread_list_item" />]]></template>
+  </templates>
+  <public_template_modifications>
+    <modification template="post" modification_key="bdad_post" description="bdAd_Slot_Post: post list position." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#^.+$#s]]></find>
+      <replace><![CDATA[$0
+
+<xen:include template="bdad_post" />]]></replace>
+    </modification>
+    <modification template="thread_list_item" modification_key="bdad_thread_list_item" description="bdAd_Slot_Thread: thread list position." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#^.+$#s]]></find>
+      <replace><![CDATA[$0
+
+<xen:include template="bdad_thread_list_item" />]]></replace>
+    </modification>
+  </public_template_modifications>
+  <bb_code_media_sites/>
+  <bb_codes/>
+</addon>

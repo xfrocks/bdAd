@@ -2,3 +2,5 @@
 *.devhelper
 library/bdAd/DevHelper/Generated
 library/bdAd/DevHelper/XFCP
+js/bdAd/*.js
+FileSums.php
