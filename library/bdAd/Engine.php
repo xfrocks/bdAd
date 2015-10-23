@@ -99,17 +99,22 @@ class bdAd_Engine
         static $instance = null;
 
         if ($instance === null) {
+            $data = array();
+
             /** @var XenForo_Model_DataRegistry $dataRegistryModel */
             $dataRegistryModel = XenForo_Model::create('XenForo_Model_DataRegistry');
-            $data = $dataRegistryModel->get(self::DATA_REGISTRY_ACTIVE_ADS);
 
-            if (!is_array($data)
-                || empty($data['version'])
-                || $data['version'] < self::VERSION
-            ) {
-                /** @var bdAd_Model_Slot $slotModel */
-                $slotModel = $dataRegistryModel->getModelFromCache('bdAd_Model_Slot');
-                $data = self::refreshActiveAds($slotModel);
+            if (!XenForo_Visitor::getInstance()->hasPermission('general', 'bdAd_noAd')) {
+                $data = $dataRegistryModel->get(self::DATA_REGISTRY_ACTIVE_ADS);
+
+                if (!is_array($data)
+                    || empty($data['version'])
+                    || $data['version'] < self::VERSION
+                ) {
+                    /** @var bdAd_Model_Slot $slotModel */
+                    $slotModel = $dataRegistryModel->getModelFromCache('bdAd_Model_Slot');
+                    $data = self::refreshActiveAds($slotModel);
+                }
             }
 
             $instance = new bdAd_Engine($dataRegistryModel, $data);

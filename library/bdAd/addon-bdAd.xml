@@ -67,6 +67,10 @@
 			</div>
 		</li>
 		<li>
+			<xen:controlunit label="">
+				<xen:html>{xen:phrase bdad_ad_criteria_user_explain}</xen:html>
+			</xen:controlunit>
+
 			<xen:include template="helper_criteria_user" />
 			<xen:include template="helper_criteria_user_date">
 				<xen:set var="$noDateFields">1</xen:set>
@@ -452,7 +456,9 @@
   <optiongroups/>
   <permissions>
     <permission_groups/>
-    <permissions/>
+    <permissions>
+      <permission permission_group_id="general" permission_id="bdAd_noAd" permission_type="flag" default_value="unset" interface_group_id="generalPermissions" display_order="9999"/>
+    </permissions>
     <interface_groups/>
   </permissions>
   <phrases>
@@ -464,6 +470,7 @@
     <phrase title="bdad_ad_add" version_id="1" version_string="0.9-dev"><![CDATA[Add New Ad]]></phrase>
     <phrase title="bdad_ad_add_short" version_id="1" version_string="0.9-dev"><![CDATA[+Ad]]></phrase>
     <phrase title="bdad_ad_confirm_deletion" version_id="1" version_string="0.9-dev"><![CDATA[Confirm Deletion of Ad]]></phrase>
+    <phrase title="bdad_ad_criteria_user_explain" version_id="1" version_string="0.9-dev"><![CDATA[Select user criteria to target this ad. If nothing is setup, it will target everyone. Please note that user who has the permission "Ad Free Access" won't see ads anyway.]]></phrase>
     <phrase title="bdad_ad_delete" version_id="1" version_string="0.9-dev"><![CDATA[Delete Ad]]></phrase>
     <phrase title="bdad_ad_description" version_id="1" version_string="0.9-dev"><![CDATA[Description]]></phrase>
     <phrase title="bdad_ad_edit" version_id="1" version_string="0.9-dev"><![CDATA[Edit Ad]]></phrase>
@@ -517,6 +524,7 @@
     <phrase title="bdad_x_clicks" version_id="1" version_string="0.9-dev"><![CDATA[{count} clicks]]></phrase>
     <phrase title="bdad_x_views" version_id="1" version_string="0.9-dev"><![CDATA[{count} views]]></phrase>
     <phrase title="cron_entry_bdAd_Log_runHourly" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement: Aggregate Logs Hourly]]></phrase>
+    <phrase title="permission_general_bdAd_noAd" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement: Ad Free Access]]></phrase>
   </phrases>
   <route_prefixes>
     <route_type type="admin">
