@@ -302,17 +302,28 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
         $slotClasses = $this->_getSlotModel()->getSlotClassTitles();
         $listSlot = array();
         foreach ($slotClasses as $slotClass => $slotClassTitle) {
-            $optGroup = sprintf('%s:', $slotClassTitle);
+            $optGroup = sprintf('[%s]', $slotClassTitle);
 
-            foreach ($slots as $slot) {
-                if ($slot['slot_class'] === $slotClass) {
+            foreach (array_keys($slots) as $slotId) {
+                if ($slots[$slotId]['slot_class'] === $slotClass) {
                     if (!isset($listSlot[$optGroup])) {
                         $listSlot[$optGroup] = array();
                     }
 
-                    $listSlot[$optGroup][$slot['slot_id']] = $slot['slot_name'];
+                    $listSlot[$optGroup][$slotId] = $slots[$slotId]['slot_name'];
+                    unset($slots[$slotId]);
                 }
             }
+        }
+        if (!empty($slots)) {
+            $listSlotNew = array();
+            foreach ($slots as $slotId => $slot) {
+                $listSlotNew[$slotId] = $slot['slot_name'];
+            }
+            foreach ($listSlot as $key => $value) {
+                $listSlotNew[$key] = $value;
+            }
+            $listSlot = $listSlotNew;
         }
         $viewParams['listSlot'] = $listSlot;
 

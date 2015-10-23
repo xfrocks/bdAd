@@ -10,6 +10,8 @@ class bdAd_Listener
             'XenForo_ViewPublic_Forum_View',
             'XenForo_ViewPublic_Search_Results',
             'XenForo_ViewPublic_Thread_View',
+
+            'WidgetFramework_DataWriter_Widget',
         );
 
         if (in_array($class, $classes, true)) {
@@ -23,6 +25,11 @@ class bdAd_Listener
             'bdAd_Listener',
             'helperEngine',
         );
+    }
+
+    public static function widget_framework_ready(array &$renderers)
+    {
+        $renderers[] = 'bdAd_WidgetFramework_WidgetRenderer_Slot';
     }
 
     public static function file_health_check(XenForo_ControllerAdmin_Abstract $controller, array &$hashes)

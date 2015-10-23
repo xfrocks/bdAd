@@ -2,6 +2,25 @@
 
 class bdAd_DataWriter_Slot extends XenForo_DataWriter
 {
+    const OPTION_VERIFY_SLOT_OPTIONS = 'verifySlotOptions';
+
+    public function getSlotOptions($existing = false)
+    {
+        if ($existing) {
+            $slotOptions = $this->getExisting('slot_options');
+        } else {
+            $slotOptions = $this->get('slot_options');
+        }
+
+        if (is_string($slotOptions)) {
+            $slotOptions = unserialize($slotOptions);
+        }
+        if (!is_array($slotOptions)) {
+            $slotOptions = array();
+        }
+
+        return $slotOptions;
+    }
 
     protected function _getFields()
     {
@@ -24,6 +43,16 @@ class bdAd_DataWriter_Slot extends XenForo_DataWriter
             )
         );
     }
+
+    protected function _getDefaultOptions()
+    {
+        $options = parent::_getDefaultOptions();
+
+        $options[self::OPTION_VERIFY_SLOT_OPTIONS] = true;
+
+        return $options;
+    }
+
 
     protected function _getExistingData($data)
     {
@@ -56,20 +85,36 @@ class bdAd_DataWriter_Slot extends XenForo_DataWriter
             $this->set('slot_name', strval(new XenForo_Phrase('bdad_slot_x', array('number' => $maxSlotId + 1))));
         }
 
-        if ($this->isChanged('slot_class')
-            || $this->isChanged('slot_options')
+        if ($this->getOption(self::OPTION_VERIFY_SLOT_OPTIONS)
+            && ($this->isChanged('slot_class')
+                || $this->isChanged('slot_options')
+            )
         ) {
             $slotOptions = unserialize($this->get('slot_options'));
+            if (empty($slotOptions)) {
+                $slotOptions = array();
+            }
+
             $slotObj = bdAd_Slot_Abstract::create($this->get('slot_class'));
             if (!$slotObj->verifySlotOptions($this, $slotOptions)) {
                 $this->error(new XenForo_Phrase('bdad_slot_options_cannot_verified'), 'slot_options');
             }
+        }
+
+        if ($this->isChanged('slot_class')
+            && $this->getExisting('class') === 'bdAd_Slot_Widget'
+        ) {
+            $this->error(new XenForo_Phrase('bdad_slot_class_must_not_change_from_widget'));
         }
     }
 
     protected function _postSave()
     {
         parent::_postSave();
+
+        if ($this->get('slot_class') === 'bdAd_Slot_Widget') {
+            $this->_SlotWidget_syncWidget();
+        }
 
         bdAd_Engine::refreshActiveAds($this->_getSlotModel());
     }
@@ -79,6 +124,10 @@ class bdAd_DataWriter_Slot extends XenForo_DataWriter
         parent::_postDelete();
 
         $this->_deleteSlotAds();
+
+        if ($this->getExisting('slot_class') === 'bdAd_Slot_Widget') {
+            $this->_SlotWidget_deleteExistingWidget();
+        }
 
         bdAd_Engine::refreshActiveAds($this->_getSlotModel());
     }
@@ -95,6 +144,44 @@ class bdAd_DataWriter_Slot extends XenForo_DataWriter
             $adDw->setExistingData($ad, true);
             $adDw->setOption(bdAd_DataWriter_Ad::OPTION_REFRESH_ACTIVE_ADS, false);
             $adDw->delete();
+        }
+    }
+
+    protected function _SlotWidget_syncWidget()
+    {
+        $slotOptions = $this->getSlotOptions();
+        if (empty($slotOptions['widgetId'])
+            || (!empty($slotOptions['_syncTime'])
+                && $slotOptions['_syncTime'] >= XenForo_Application::$time
+            )
+        ) {
+            return;
+        }
+
+        $slotOptions['_syncTime'] = XenForo_Application::$time;
+        $slotOptions['_syncMethod'] = __METHOD__;
+
+        /** @var WidgetFramework_DataWriter_Widget $widgetDw */
+        $widgetDw = XenForo_DataWriter::create('WidgetFramework_DataWriter_Widget');
+        $widgetDw->setExistingData($slotOptions['widgetId']);
+        if (strip_tags($widgetDw->get('title')) != $this->get('slot_name')) {
+            $widgetDw->set('title', $this->get('slot_name'));
+        }
+        $widgetDw->setWidgetOption('slotId', $this->get('slot_id'));
+        $widgetDw->setWidgetOption('slotOptions', $slotOptions);
+        $widgetDw->save();
+    }
+
+    protected function _SlotWidget_deleteExistingWidget()
+    {
+        $existingSlotOptions = $this->getSlotOptions(true);
+        if (!empty($existingSlotOptions['widgetId'])) {
+            /** @var WidgetFramework_DataWriter_Widget $widgetDw */
+            $widgetDw = XenForo_DataWriter::create('WidgetFramework_DataWriter_Widget',
+                XenForo_DataWriter::ERROR_SILENT);
+            if ($widgetDw->setExistingData($existingSlotOptions['widgetId'])) {
+                $widgetDw->delete();
+            }
         }
     }
 

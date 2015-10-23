@@ -167,6 +167,12 @@ class bdAd_ControllerAdmin_Slot extends XenForo_ControllerAdmin_Abstract
             $viewParams['slotObj'] = bdAd_Slot_Abstract::create($slot['slot_class'], false);
         }
 
+        if (!empty($viewParams['slotObj'])
+            && !isset($viewParams['slotClasses'][$slot['slot_class']])
+        ) {
+            $viewParams['slotClassNotListed'] = true;
+        }
+
         return $this->responseView('bdAd_ViewAdmin_Slot_Edit', 'bdad_slot_edit', $viewParams);
     }
 

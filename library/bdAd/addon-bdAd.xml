@@ -96,7 +96,8 @@
 <xen:edithint template="bdad_ad_options__slot_options_username" />
 <xen:edithint template="bdad_ad_options__upload" />
 <xen:edithint template="bdad_ad_options_post" />
-<xen:edithint template="bdad_ad_options_thread" />]]></template>
+<xen:edithint template="bdad_ad_options_thread" />
+<xen:edithint template="bdad_ad_options_widget" />]]></template>
     <template title="bdad_ad_list"><![CDATA[<xen:title>{xen:phrase bdad_ads}</xen:title>
 
 <xen:topctrl>
@@ -224,6 +225,27 @@
 	<xen:set var="$label">{xen:phrase avatar}</xen:set>
 	<xen:set var="$hint">{xen:phrase optional}</xen:set>
 </xen:include>]]></template>
+    <template title="bdad_ad_options_widget"><![CDATA[<xen:if is="{$slot.slot_options.adLayout} == 'image'">
+	<div class="baseHtml"><ul><li>{xen:phrase bdad_ad_layout}: {xen:phrase bdad_ad_layout_image}</li></ul></div>
+	
+	<xen:include template="bdad_ad_options__link" />
+	
+	<xen:include template="bdad_ad_options__upload">
+		<xen:set var="$optionKey">image</xen:set>
+		<xen:set var="$label">{xen:phrase bdad_ad_image}</xen:set>
+		<xen:set var="$hint">{xen:phrase optional}</xen:set>
+	</xen:include>
+<xen:elseif is="{$slot.slot_options.adLayout} == 'html'"/>
+	<div class="baseHtml"><ul><li>{xen:phrase bdad_ad_layout}: {xen:phrase bdad_ad_layout_html}</li></ul></div>
+	
+	<xen:textboxunit label="{xen:phrase html}:" name="ad_options[html]" value="{$ad.ad_options.html}"
+					 rows="5" inputclass="Elastic" />
+<xen:else />
+	<div class="baseHtml"><ul><li>{xen:phrase bdad_ad_layout}: {xen:phrase bdad_ad_layout_text}</li></ul></div>
+	
+	<xen:include template="bdad_ad_options__link" />
+</xen:if>
+	]]></template>
     <template title="bdad_ad_options__link"><![CDATA[<xen:textboxunit label="{xen:phrase bdad_link}:" name="ad_options[link]" value="{$ad.ad_options.link}"
 				 placeholder="https://www.google.com/" />]]></template>
     <template title="bdad_ad_options__slot_options_forumIds"><![CDATA[<xen:if hascontent="true">
@@ -321,11 +343,19 @@
 						'{xen:phrase bdad_slot_edit}: <em>%s</em>',
 						'{xen:phrase bdad_slot_add}: <em>%s</em>'}" />
 
-	<xen:selectunit label="{xen:phrase bdad_slot_class}:" name="slot_class" value="{$slot.slot_class}"
-					data-options-selector="#slotOptions"
-					data-options-url="{xen:adminlink ad-slots/options}">
-		<xen:options source="$slotClasses" />
-	</xen:selectunit>
+	<xen:if is="!{$slotClassNotListed}">
+		<xen:selectunit label="{xen:phrase bdad_slot_class}:" name="slot_class" value="{$slot.slot_class}"
+						data-options-selector="#slotOptions"
+						data-options-url="{xen:adminlink ad-slots/options}">
+			<xen:options source="$slotClasses" />
+		</xen:selectunit>
+	<xen:else />
+		<xen:controlunit label="{xen:phrase bdad_slot_class}:">
+			{$slot.slot_class}
+			<input type="hidden" name="slot_class" value="{$slot.slot_class}" />
+		</xen:controlunit>
+	</xen:if>
+
 	<div id="slotOptions">
 		<xen:include template="bdad_slot_options" />
 	</div>
@@ -344,8 +374,11 @@
 <xen:edithint template="bdad_slot_options__forumIds" />
 <xen:edithint template="bdad_slot_options__search" />
 <xen:edithint template="bdad_slot_options__username" />
+<xen:edithint template="bdad_slot_options__widget" />
 <xen:edithint template="bdad_slot_options_post" />
-<xen:edithint template="bdad_slot_options_thread" />]]></template>
+<xen:edithint template="bdad_slot_options_thread" />
+<xen:edithint template="bdad_slot_options_widget" />
+<xen:edithint template="bdad_widget_options_slot" />]]></template>
     <template title="bdad_slot_list"><![CDATA[<xen:title>{xen:phrase bdad_slots}</xen:title>
 
 <xen:topctrl>
@@ -425,6 +458,10 @@
 				 placeholder="{xen:phrase bdad_sponsored_text}"
 				 hint="{xen:phrase optional}"
 				 explain="{xen:phrase bdad_sponsored_text_explain, 'phrase={xen:phrase bdad_sponsored_text}'}" />]]></template>
+    <template title="bdad_slot_options_widget"><![CDATA[<xen:include template="bdad_slot_options__widget">
+	<xen:set var="$inputPrefix">slot_options</xen:set>
+	<xen:map from="$slot.slot_options" to="$slotOptions" />
+</xen:include>]]></template>
     <template title="bdad_slot_options__forumIds"><![CDATA[<xen:selectunit label="{xen:phrase forums}:" name="slot_options[forumIds]" multiple="true"
 				explain="{xen:phrase bdad_slot_options_forum_ids_explain}">
 	<xen:options source="$forums" />
@@ -438,6 +475,19 @@
 				 placeholder="{xen:phrase bdad_username}"
 				 hint="{xen:phrase optional}"
 				 explain="{xen:phrase bdad_slot_options_username_explain, 'phrase={xen:phrase bdad_username}'}" />]]></template>
+    <template title="bdad_slot_options__widget"><![CDATA[<xen:selectunit label="{xen:phrase bdad_ad_layout}:" name="{$inputPrefix}[adLayout]" value="{$slotOptions.adLayout}">
+	<xen:option value="text">{xen:phrase bdad_ad_layout_text}</xen:option>
+	<xen:option value="image">{xen:phrase bdad_ad_layout_image}</xen:option>
+	<xen:option value="html">{xen:phrase bdad_ad_layout_html}</xen:option>
+</xen:selectunit>
+
+<input type="hidden" name="{$inputPrefix}[widgetId]]" value="{$slotOptions.widgetId}" />]]></template>
+    <template title="bdad_widget_options_slot"><![CDATA[<xen:include template="bdad_slot_options__widget">
+	<xen:set var="$inputPrefix">{$namePrefix}slotOptions</xen:set>
+	<xen:map from="$options.slotOptions" to="$slotOptions" />
+</xen:include>
+
+<input type="hidden" name="{$namePrefix}slotId" value="{$options.slotId}" />]]></template>
   </admin_templates>
   <admin_template_modifications/>
   <code_events/>
@@ -445,8 +495,10 @@
     <listener event_id="file_health_check" execute_order="10" callback_class="bdAd_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
     <listener event_id="init_dependencies" execute_order="10" callback_class="bdAd_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
     <listener event_id="load_class_controller" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
+    <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="load_class_view" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="template_hook" execute_order="10" callback_class="bdAd_Engine" callback_method="onTemplateHook" active="1" hint="bdad_hook" description="bdAd_Engine::onTemplateHook($hookName=bdad_hook,...)"/>
+    <listener event_id="widget_framework_ready" execute_order="10" callback_class="bdAd_Listener" callback_method="widget_framework_ready" active="1" hint="" description=""/>
   </code_event_listeners>
   <cron>
     <entry entry_id="bdAd_Log_runHourly" cron_class="bdAd_CronEntry_Log" cron_method="runHourly" active="1"><![CDATA[{"day_type":"dom","dom":["-1"],"hours":["-1"],"minutes":["6"]}]]></entry>
@@ -474,7 +526,12 @@
     <phrase title="bdad_ad_delete" version_id="1" version_string="0.9-dev"><![CDATA[Delete Ad]]></phrase>
     <phrase title="bdad_ad_description" version_id="1" version_string="0.9-dev"><![CDATA[Description]]></phrase>
     <phrase title="bdad_ad_edit" version_id="1" version_string="0.9-dev"><![CDATA[Edit Ad]]></phrase>
+    <phrase title="bdad_ad_image" version_id="1" version_string="0.9-dev"><![CDATA[Ad Image]]></phrase>
     <phrase title="bdad_ad_is_active" version_id="1" version_string="0.9-dev"><![CDATA[Ad is active]]></phrase>
+    <phrase title="bdad_ad_layout" version_id="1" version_string="0.9-dev"><![CDATA[Ad Layout]]></phrase>
+    <phrase title="bdad_ad_layout_html" version_id="1" version_string="0.9-dev"><![CDATA[HTML]]></phrase>
+    <phrase title="bdad_ad_layout_image" version_id="1" version_string="0.9-dev"><![CDATA[Image]]></phrase>
+    <phrase title="bdad_ad_layout_text" version_id="1" version_string="0.9-dev"><![CDATA[Text]]></phrase>
     <phrase title="bdad_ad_name" version_id="1" version_string="0.9-dev"><![CDATA[Ad Name]]></phrase>
     <phrase title="bdad_ad_not_found" version_id="1" version_string="0.9-dev"><![CDATA[The requested ad could not be found]]></phrase>
     <phrase title="bdad_ad_no_results" version_id="1" version_string="0.9-dev"><![CDATA[No ad could be found...]]></phrase>
@@ -497,6 +554,7 @@
     <phrase title="bdad_slots" version_id="1" version_string="0.9-dev"><![CDATA[Slots]]></phrase>
     <phrase title="bdad_slot_add" version_id="1" version_string="0.9-dev"><![CDATA[Add New Slot]]></phrase>
     <phrase title="bdad_slot_class" version_id="1" version_string="0.9-dev"><![CDATA[Slot Class]]></phrase>
+    <phrase title="bdad_slot_class_must_not_change_from_widget" version_id="1" version_string="0.9-dev"><![CDATA[Slot Class must not be changed.]]></phrase>
     <phrase title="bdad_slot_confirm_deletion" version_id="1" version_string="0.9-dev"><![CDATA[Confirm Deletion of Slot]]></phrase>
     <phrase title="bdad_slot_delete" version_id="1" version_string="0.9-dev"><![CDATA[Delete Slot]]></phrase>
     <phrase title="bdad_slot_edit" version_id="1" version_string="0.9-dev"><![CDATA[Edit Slot]]></phrase>
@@ -505,6 +563,7 @@
     <phrase title="bdad_slot_not_found" version_id="1" version_string="0.9-dev"><![CDATA[The requested slot could not be found]]></phrase>
     <phrase title="bdad_slot_no_results" version_id="1" version_string="0.9-dev"><![CDATA[No slot could be found...]]></phrase>
     <phrase title="bdad_slot_options_cannot_verified" version_id="1" version_string="0.9-dev"><![CDATA[Slot options cannot be verified.]]></phrase>
+    <phrase title="bdad_slot_options_error_widget_id_required" version_id="1" version_string="0.9-dev"><![CDATA[The associated widget must be specified.]]></phrase>
     <phrase title="bdad_slot_options_forum_ids_explain" version_id="1" version_string="0.9-dev"><![CDATA[Select forums in which ads should be served. Select none to enable ads for all forums.]]></phrase>
     <phrase title="bdad_slot_options_search_toggle" version_id="1" version_string="0.9-dev"><![CDATA[Check this box to serve ads in search results page]]></phrase>
     <phrase title="bdad_slot_options_username_explain" version_id="1" version_string="0.9-dev"><![CDATA[Enter custom username to serve ads with. Left blank to use the phrase bdad_username ("{phrase}").]]></phrase>
@@ -521,6 +580,8 @@
     <phrase title="bdad_translations" version_id="1" version_string="0.9-dev"><![CDATA[Translations]]></phrase>
     <phrase title="bdad_username" version_id="1" version_string="0.9-dev"><![CDATA[Advertisement]]></phrase>
     <phrase title="bdad_user_targeting" version_id="1" version_string="0.9-dev"><![CDATA[User Targeting]]></phrase>
+    <phrase title="bdad_widget_slot_name" version_id="1" version_string="0.9-dev"><![CDATA[Ad Slot]]></phrase>
+    <phrase title="bdad_widget_slot_title_cannot_empty" version_id="1" version_string="0.9-dev"><![CDATA[Ad Slot widget's title cannot be empty.]]></phrase>
     <phrase title="bdad_x_clicks" version_id="1" version_string="0.9-dev"><![CDATA[{count} clicks]]></phrase>
     <phrase title="bdad_x_views" version_id="1" version_string="0.9-dev"><![CDATA[{count} views]]></phrase>
     <phrase title="cron_entry_bdAd_Log_runHourly" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement: Aggregate Logs Hourly]]></phrase>
@@ -551,7 +612,8 @@
 
 .searchResult.adAsPost { background-color: #ffffec; }
 .searchResult.adAsPost .avatar img { max-width: 48px; max-height: 48px; }
-]]></template>
+
+.adWidget-image img { width: 100%; }]]></template>
     <template title="bdad_post" version_id="1" version_string="0.9-dev"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Post,
 	post, $forum, $thread, $post}</xen:set>
 <xen:if is="{$adIds}">
@@ -684,6 +746,23 @@
 </xen:if>
 
 <xen:edithint template="thread_list_item" />]]></template>
+    <template title="bdad_widget_slot" version_id="1" version_string="0.9-dev"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Widget, $widget.options.slotId}</xen:set>
+<xen:if is="{$adIds}">
+	<xen:require css="bdad.css" />
+
+	<xen:hook name="bdad_hook" params="{xen:array 'slotClass=bdAd_Slot_Widget', 'adIds={$adIds}'}">
+		<div class="adWidget adWidget-{$widget.options.slotOptions.adLayout}">
+			<xen:if is="{$widget.options.slotOptions.adLayout} == 'image'">
+				<a href="{link}" rel="nofollow"><img src="{imageUrl}" /></a>
+			<xen:elseif is="{$widget.options.slotOptions.adLayout} == 'html'"/>
+				{html}
+			<xen:else />
+				<h4><a href="{link}" rel="nofollow">{title}</a></h4>
+				<p>{description}</p>
+			</xen:if>
+		</div>
+	</xen:hook>
+</xen:if>]]></template>
   </templates>
   <public_template_modifications>
     <modification template="post" modification_key="bdad_post" description="bdAd_Slot_Post: post list position." execution_order="10" enabled="1" action="preg_replace">
