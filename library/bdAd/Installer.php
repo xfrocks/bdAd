@@ -135,6 +135,8 @@ class bdAd_Installer
         $dataRegistryModel->delete(bdAd_Engine::DATA_REGISTRY_ACTIVE_ADS);
 
         XenForo_Application::setSimpleCacheData(bdAd_Engine::SIMPLE_CACHE_ACTIVE_SLOT_CLASSES, false);
+
+        bdAd_ShippableHelper_Updater::onUninstall(bdAd_Listener::UPDATER_URL);
     }
 
 }

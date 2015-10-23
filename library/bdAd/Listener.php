@@ -2,6 +2,8 @@
 
 class bdAd_Listener
 {
+    const UPDATER_URL = 'https://xfrocks.com/api/index.php?updater';
+
     public static function load_class($class, array &$extend)
     {
         static $classes = array(
@@ -25,6 +27,8 @@ class bdAd_Listener
             'bdAd_Listener',
             'helperEngine',
         );
+
+        bdAd_ShippableHelper_Updater::onInitDependencies($dependencies, self::UPDATER_URL);
     }
 
     public static function widget_framework_ready(array &$renderers)
