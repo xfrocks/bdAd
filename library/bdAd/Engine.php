@@ -44,7 +44,12 @@ class bdAd_Engine
 
     public static function isSlotClassActive($slotClass)
     {
-        $activeSlotClasses = XenForo_Application::getSimpleCacheData(self::SIMPLE_CACHE_ACTIVE_SLOT_CLASSES);
+        if (self::$_activeSlotClasses === null) {
+            $activeSlotClasses = XenForo_Application::getSimpleCacheData(self::SIMPLE_CACHE_ACTIVE_SLOT_CLASSES);
+        } else {
+            $activeSlotClasses =& self::$_activeSlotClasses;
+        }
+
         if (empty($activeSlotClasses)) {
             return false;
         }
@@ -130,6 +135,8 @@ class bdAd_Engine
     private $_servedSlots = array();
     private $_servedAds = array();
 
+    private static $_activeSlotClasses = null;
+
     private function __construct(XenForo_Model_DataRegistry $dataRegistryModel, array $data)
     {
         $this->_dataRegistryModel = $dataRegistryModel;
@@ -141,6 +148,8 @@ class bdAd_Engine
         if (!empty($data['adsGrouped'])) {
             $this->_adsGrouped = $data['adsGrouped'];
         }
+
+        $this->_updateActiveSlotClasses();
     }
 
     public function getSlotsByClass($slotClass)
@@ -208,6 +217,8 @@ class bdAd_Engine
             $logModel->logAdView($adId);
         }
 
+        $this->_updateActiveSlotClasses();
+
         return false;
     }
 
@@ -227,6 +238,17 @@ class bdAd_Engine
         }
 
         return array($slot, $ad);
+    }
+
+    private function _updateActiveSlotClasses()
+    {
+        $slotClasses = array();
+
+        foreach ($this->_slots as $slot) {
+            $slotClasses[$slot['slot_class']] = 1;
+        }
+
+        self::$_activeSlotClasses = array_keys($slotClasses);
     }
 
 }
