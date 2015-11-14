@@ -632,13 +632,13 @@
 .searchResult.adAsPost .avatar img { max-width: 48px; max-height: 48px; }
 
 .adWidget-image img { width: 100%; }]]></template>
-    <template title="bdad_post" version_id="1" version_string="0.9-dev"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Post,
+    <template title="bdad_post" version_id="2" version_string="1.0.0"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Post,
 	post, $forum, $thread, $post}</xen:set>
 <xen:if is="{$adIds}">
 	<xen:require css="bdad.css" />
 
 	<xen:hook name="bdad_hook" params="{xen:array 'slotClass=bdAd_Slot_Post', 'adIds={$adIds}'}">
-		<li id="{$messageId}" class="message adAsPost" data-ids="{$adIds}">
+		<li class="message adAsPost{_adClass}"{_adAttributes}>
 
 			<div class="messageUserInfo">
 				<div class="messageUserBlock {xen:if $user.isOnline, online}">
@@ -668,9 +668,7 @@
 					</article>
 				</div>
 
-				<xen:if is="{$visitor.content_show_signature} && {$message.signature}">
-					<div class="baseHtml signature messageText ugc"><aside>{sponsoredText}</aside></div>
-				</xen:if>
+				<div class="baseHtml signature messageText ugc"><aside>{sponsoredText}</aside></div>
 			</div>
 		</li>
 	</xen:hook>
@@ -679,9 +677,9 @@
 <xen:edithint template="post" />
 <xen:edithint template="message" />
 <xen:edithint template="message_user_info" />]]></template>
-    <template title="bdad_search_result_post" version_id="1" version_string="0.9-dev"><![CDATA[<xen:require css="bdad.css" />
+    <template title="bdad_search_result_post" version_id="2" version_string="1.0.0"><![CDATA[<xen:require css="bdad.css" />
 
-<li class="searchResult post primaryContent adAsPost" data-ids="{$adIds}">
+<li class="searchResult post primaryContent adAsPost{_adClass}"{_adAttributes}>
 
 	<div class="listBlock posterAvatar">
 		<a href="{link}" rel="nofollow" class="avatar NoOverlay">
@@ -702,9 +700,9 @@
 </li>
 
 <xen:edithint template="search_result_post" />]]></template>
-    <template title="bdad_search_result_thread" version_id="1" version_string="0.9-dev"><![CDATA[<xen:require css="bdad.css" />
+    <template title="bdad_search_result_thread" version_id="2" version_string="1.0.0"><![CDATA[<xen:require css="bdad.css" />
 
-<li class="searchResult thread primaryContent adAsThread" data-ids="{$adIds}">
+<li class="searchResult thread primaryContent adAsThread{_adClass}"{_adAttributes}>
 
 	<div class="listBlock posterAvatar">
 		<a href="{link}" rel="nofollow" class="avatar NoOverlay">
@@ -726,13 +724,13 @@
 </li>
 
 <xen:edithint template="search_result_thread" />]]></template>
-    <template title="bdad_thread_list_item" version_id="1" version_string="0.9-dev"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Thread,
+    <template title="bdad_thread_list_item" version_id="2" version_string="1.0.0"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Thread,
 	thread_list_item, $forum, $thread}</xen:set>
 <xen:if is="{$adIds}">
 	<xen:require css="bdad.css" />
 
 	<xen:hook name="bdad_hook" params="{xen:array 'slotClass=bdAd_Slot_Thread', 'adIds={$adIds}'}">
-		<li class="discussionListItem adAsThread" data-ids="{$adIds}">
+		<li class="discussionListItem adAsThread{_adClass}"{_adAttributes}>
 
 			<div class="listBlock posterAvatar">
 				<span class="avatarContainer">
@@ -764,12 +762,12 @@
 </xen:if>
 
 <xen:edithint template="thread_list_item" />]]></template>
-    <template title="bdad_widget_slot" version_id="1" version_string="0.9-dev"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Widget, $widget.options.slotId}</xen:set>
+    <template title="bdad_widget_slot" version_id="2" version_string="1.0.0"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Widget, $widget.options.slotId}</xen:set>
 <xen:if is="{$adIds}">
 	<xen:require css="bdad.css" />
 
 	<xen:hook name="bdad_hook" params="{xen:array 'slotClass=bdAd_Slot_Widget', 'adIds={$adIds}'}">
-		<div class="adWidget adWidget-{$widget.options.slotOptions.adLayout}">
+		<div class="adWidget adWidget-{$widget.options.slotOptions.adLayout}{_adClass}"{_adAttributes}>
 			<xen:if is="{$widget.options.slotOptions.adLayout} == 'image'">
 				<a href="{link}" rel="nofollow"><img src="{imageUrl}" /></a>
 			<xen:elseif is="{$widget.options.slotOptions.adLayout} == 'html'"/>

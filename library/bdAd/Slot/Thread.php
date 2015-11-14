@@ -134,14 +134,8 @@ class bdAd_Slot_Thread extends bdAd_Slot_Abstract
         return $ad['ad_id'];
     }
 
-    public function prepareAdHtml($adId, $htmlWithPlaceholders)
+    protected function _prepareAdHtml(array $ad, array $slot, $htmlWithPlaceholders)
     {
-        $engine = bdAd_Engine::getInstance();
-        list($slot, $ad) = $engine->getServedSlotAndAd($adId);
-        if (empty($ad)) {
-            return '';
-        }
-
         $mapping = array(
             '{title}' => $this->_prepareAdHtml_helperAdPhrase($ad, 'title'),
             '{description}' => $this->_prepareAdHtml_helperAdPhrase($ad, 'description'),

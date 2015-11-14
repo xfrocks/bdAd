@@ -55,7 +55,27 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
 
     abstract public function adIdsShouldBeServed();
 
-    abstract public function prepareAdHtml($adId, $htmlWithPlaceholders);
+    final public function prepareAdHtml($adId, $htmlWithPlaceholders)
+    {
+        $engine = bdAd_Engine::getInstance();
+        list($slot, $ad) = $engine->getServedSlotAndAd($adId);
+        if (empty($ad)) {
+            return '';
+        }
+
+        $html = $this->_prepareAdHtml($ad, $slot, $htmlWithPlaceholders);
+
+        if (!empty($html)) {
+            $mapping = array(
+                '{_adClass}' => sprintf(' ad-%d slot-%d', $ad['ad_id'], $slot['slot_id']),
+                '{_adAttributes}' => sprintf(' data-ad-id="%d"', $ad['ad_id']),
+            );
+
+            $html = str_replace(array_keys($mapping), array_values($mapping), $html);
+        }
+
+        return $html;
+    }
 
     protected function _getSlotOptionsTemplate()
     {
@@ -160,6 +180,8 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
 
         return in_array($forum['node_id'], $forumIds);
     }
+
+    abstract protected function _prepareAdHtml(array $ad, array $slot, $htmlWithPlaceholders);
 
     protected function _prepareAdHtml_helperAdPhrase(array $ad, $type)
     {
