@@ -307,6 +307,24 @@
 		</xen:if>
 	</xen:html>
 </xen:controlunit>]]></template>
+    <template title="bdad_ad_upload"><![CDATA[<xen:title>{$ad.ad_name} - {xen:phrase upload_file}</xen:title>
+<xen:h1>{xen:phrase upload_file}</xen:h1>
+
+<xen:navigation>
+	<xen:breadcrumb href="{xen:adminlink 'ads/edit', $ad}">{$ad.ad_name}</xen:breadcrumb>
+</xen:navigation>
+
+<xen:form action="{xen:adminlink 'ads/upload', $ad}" upload="true" class="xenForm formOverlay">
+
+	<xen:uploadunit label="" name="file" />
+
+	<xen:submitunit save="{xen:phrase bdad_ad_save}" />
+
+	<input type="hidden" name="_xfConfirm" value="1" />
+	<input type="hidden" name="slot_id" value="{$slot.slot_id}" />
+	<input type="hidden" name="option_key" value="{$optionKey}" />
+
+</xen:form>]]></template>
     <template title="bdad_slot_delete"><![CDATA[<xen:title>{xen:phrase bdad_slot_confirm_deletion}: {$slot.slot_name}</xen:title>
 <xen:h1>{xen:phrase bdad_slot_confirm_deletion}</xen:h1>
 
