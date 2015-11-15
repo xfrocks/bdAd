@@ -198,7 +198,7 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
     protected function _prepareAdHtml_helperLink(array $ad)
     {
         if (isset($ad['ad_options']['link'])) {
-            return bdAd_Helper_Security::getClickTrackingUrl($ad, $ad['ad_options']['link']);
+            return bdAd_Helper_Security::getClickTrackingUrl($ad['ad_id'], $ad['ad_options']['link']);
         }
 
         return '';

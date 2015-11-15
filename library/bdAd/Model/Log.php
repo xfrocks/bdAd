@@ -37,6 +37,19 @@ class bdAd_Model_Log extends XenForo_Model
 		', $adId);
     }
 
+    public function logAdViews(array $adIds)
+    {
+        if (empty($adIds)) {
+            return;
+        }
+
+        $this->_getDb()->query(sprintf('
+        	INSERT ' . (XenForo_Application::getOptions()->get('enableInsertDelayed') ? 'DELAYED' : '')
+            . ' INTO xf_bdad_view (ad_id)
+			VALUES (%s)
+		', implode('), (', $adIds)));
+    }
+
     public function aggregateAdViews()
     {
         $db = $this->_getDb();

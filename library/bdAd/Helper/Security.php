@@ -2,15 +2,16 @@
 
 class bdAd_Helper_Security
 {
-    public static function getClickTrackingUrl(array $ad, $link)
+    public static function getClickTrackingUrl($adId, $link)
     {
         $data = array(
-            'ad_id' => $ad['ad_id'],
+            'ad_id' => $adId,
             'sid' => XenForo_Application::getSession()->getSessionId(),
         );
 
         return XenForo_Link::buildPublicLink('full:misc/ads/click', null, array(
             'redirect' => $link,
+            'ad_id' => $adId,
             'data' => self::packData($data),
         ));
     }

@@ -4,9 +4,13 @@ class bdAd_Listener
 {
     const UPDATER_URL = 'https://xfrocks.com/api/index.php?updater';
 
+    public static $adHasBeenServed = false;
+
     public static function load_class($class, array &$extend)
     {
         static $classes = array(
+            'bdCache_Model_Cache',
+
             'XenForo_ControllerPublic_Misc',
 
             'XenForo_ViewPublic_Forum_View',

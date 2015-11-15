@@ -218,6 +218,7 @@ class bdAd_Engine
         }
 
         $this->_updateActiveSlotClasses();
+        bdAd_Listener::$adHasBeenServed = true;
 
         return false;
     }
@@ -238,6 +239,11 @@ class bdAd_Engine
         }
 
         return array($slot, $ad);
+    }
+
+    public function getServedAdIds()
+    {
+        return array_keys($this->_servedAds);
     }
 
     private function _updateActiveSlotClasses()

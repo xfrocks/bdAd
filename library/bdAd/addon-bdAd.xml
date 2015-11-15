@@ -514,6 +514,7 @@
     <listener event_id="init_dependencies" execute_order="10" callback_class="bdAd_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
     <listener event_id="load_class_controller" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
+    <listener event_id="load_class_model" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="load_class_view" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="template_hook" execute_order="10" callback_class="bdAd_Engine" callback_method="onTemplateHook" active="1" hint="bdad_hook" description="bdAd_Engine::onTemplateHook($hookName=bdad_hook,...)"/>
     <listener event_id="widget_framework_ready" execute_order="10" callback_class="bdAd_Listener" callback_method="widget_framework_ready" active="1" hint="" description=""/>
