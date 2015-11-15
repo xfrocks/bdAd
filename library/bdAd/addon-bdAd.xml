@@ -2,6 +2,7 @@
 <addon addon_id="bdAd" title="[bd] Advertisement" version_string="1.0.0" version_id="2" url="" install_callback_class="bdAd_Installer" install_callback_method="install" uninstall_callback_class="bdAd_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdAd" parent_navigation_id="setup" display_order="9999" link="ads" admin_permission_id="bdAd" debug_only="0" hide_no_children="0"/>
+    <navigation navigation_id="bdAd_ads" parent_navigation_id="bdAd" display_order="1" link="ads" admin_permission_id="" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdAd_slots" parent_navigation_id="bdAd" display_order="10" link="ad-slots" admin_permission_id="" debug_only="0" hide_no_children="0"/>
   </admin_navigation>
   <admin_permissions>
@@ -534,6 +535,7 @@
   </permissions>
   <phrases>
     <phrase title="admin_navigation_bdAd" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement]]></phrase>
+    <phrase title="admin_navigation_bdAd_ads" version_id="2" version_string="1.0.0"><![CDATA[Ads]]></phrase>
     <phrase title="admin_navigation_bdAd_slots" version_id="1" version_string="0.9-dev"><![CDATA[Ad Slots]]></phrase>
     <phrase title="admin_permission_bdAd" version_id="1" version_string="0.9-dev"><![CDATA[Manage advertisements]]></phrase>
     <phrase title="bdad_ad" version_id="1" version_string="0.9-dev"><![CDATA[Advertisement]]></phrase>
