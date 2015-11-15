@@ -129,9 +129,19 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
             $attachmentDw->delete();
         }
 
+        $redirectTarget = XenForo_Link::buildAdminLink('ads') . $this->getLastHash($dw->get('ad_id'));
+
+        $redirectUpload = $this->_input->filterSingle('redirect_upload', XenForo_Input::STRING);
+        if (!empty($redirectUpload)) {
+            $redirectTarget = XenForo_Link::buildAdminLink('ads/upload', $dw->getMergedData(), array(
+                'slot_id' => $dw->get('slot_id'),
+                'option_key' => $redirectUpload,
+            ));
+        }
+
         return $this->responseRedirect(
             XenForo_ControllerResponse_Redirect::SUCCESS,
-            XenForo_Link::buildAdminLink('ads') . $this->getLastHash($dw->get('ad_id'))
+            $redirectTarget
         );
     }
 

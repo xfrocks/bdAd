@@ -56,7 +56,7 @@
 			<xen:textboxunit label="{xen:phrase bdad_ad_title}:" name="_phrases[title]" value="{$ad.phrases.title}"
 							 hint="{xen:phrase optional}" />
 			<xen:textboxunit label="{xen:phrase bdad_ad_description}:" name="_phrases[description]" value="{$ad.phrases.description}"
-							 hint="{xen:phrase optional}" />
+							 hint="{xen:phrase optional}" rows="5" />
 
 			<xen:selectunit label="{xen:phrase bdad_slot}:" name="slot_id" value="{$ad.slot_id}"
 							data-options-selector="#adOptions"
@@ -233,6 +233,7 @@
 	
 	<xen:include template="bdad_ad_options__upload">
 		<xen:set var="$optionKey">image</xen:set>
+		<xen:set var="$defaultUpload">image</xen:set>
 		<xen:set var="$label">{xen:phrase bdad_ad_image}</xen:set>
 		<xen:set var="$hint">{xen:phrase optional}</xen:set>
 	</xen:include>
@@ -303,6 +304,12 @@
 			<a href="{xen:adminlink ads/upload, $ad,
 					 'slot_id={$ad.slot_id}',
 					 'option_key={$optionKey}'}" class="OverlayTrigger">{xen:phrase upload_file}</a>
+		<xen:elseif is="{$defaultUpload} === {$optionKey}" />
+			<xen:checkbox>
+				<xen:option name="redirect_upload" value="{$optionKey}" selected="1">
+					{xen:phrase upload_file}
+				</xen:option>
+			</xen:checkbox>
 		<xen:else />
 			{xen:phrase bdad_save_then_edit_to_upload_file}
 		</xen:if>
