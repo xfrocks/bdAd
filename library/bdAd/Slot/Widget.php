@@ -11,15 +11,88 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         return parent::verifySlotOptions($dw, $slotOptions);
     }
 
-    public function allowUpload($optionKey)
+    public function allowUpload(array $slot, $optionKey)
     {
         switch ($optionKey) {
             case 'image':
-                return true;
+                if (!empty($slot['slot_options']['adLayout'])
+                    && $slot['slot_options']['adLayout'] === 'image'
+                ) {
+                    return true;
+                }
+                break;
         }
 
-        return parent::allowUpload($optionKey);
+        return parent::allowUpload($slot, $optionKey);
     }
+
+    public function getUploadConstraints(array $slot, $optionKey)
+    {
+        $constraints = parent::getUploadConstraints($slot, $optionKey);
+
+        switch ($optionKey) {
+            case 'image':
+                if (!empty($slot['slot_options']['adLayout'])
+                    && $slot['slot_options']['adLayout'] === 'image'
+                ) {
+                    if (!empty($slot['slot_options']['width'])) {
+                        $constraints['width'] = intval($slot['slot_options']['width']);
+                    }
+                    if (!empty($slot['slot_options']['height'])) {
+                        $constraints['height'] = intval($slot['slot_options']['height']);
+                    }
+                }
+                break;
+        }
+
+        return $constraints;
+    }
+
+    public function assertUploadedFile(array $slot, $optionKey, XenForo_Upload $file)
+    {
+        switch ($optionKey) {
+            case 'image':
+                if (!empty($slot['slot_options']['adLayout'])
+                    && $slot['slot_options']['adLayout'] === 'image'
+                ) {
+                    $width = 0;
+                    $height = 0;
+                    if (!empty($slot['slot_options']['width'])) {
+                        $width = intval($slot['slot_options']['width']);
+                    }
+                    if (!empty($slot['slot_options']['height'])) {
+                        $height = intval($slot['slot_options']['height']);
+                    }
+
+                    $fileWidth = intval($file->getImageInfoField('width'));
+                    $fileHeight = intval($file->getImageInfoField('height'));
+                    if ($width > 0 && $height > 0) {
+                        if ($fileWidth < $width || $fileHeight < $height) {
+                            throw new XenForo_Exception(new XenForo_Phrase('bdad_please_upload_image_dimension_x_y', array(
+                                'width' => $width,
+                                'height' => $height,
+                            )));
+                        }
+                    } elseif ($width > 0) {
+                        if ($fileWidth < $width) {
+                            throw new XenForo_Exception(new XenForo_Phrase('bdad_please_upload_image_width_x', array(
+                                'width' => $width,
+                            )));
+                        }
+                    } elseif ($height > 0) {
+                        if ($fileHeight < $height) {
+                            throw new XenForo_Exception(new XenForo_Phrase('bdad_please_upload_image_height_x', array(
+                                'height' => $height,
+                            )));
+                        }
+                    }
+                }
+                break;
+        }
+
+        return parent::assertUploadedFile($slot, $optionKey, $file);
+    }
+
 
     public function verifyAdOptions(bdAd_DataWriter_Ad $dw, array $slot, array $adOptions)
     {

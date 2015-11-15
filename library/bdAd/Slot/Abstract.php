@@ -32,20 +32,27 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
         ));
     }
 
-    public function allowUpload($optionKey)
+    public function allowUpload(array $slot, $optionKey)
     {
         return false;
     }
 
-    public function getUploadConstraints($optionKey)
+    public function getUploadConstraints(array $slot, $optionKey)
     {
-        /** @var XenForo_Model_Attachment $attachmentModel */
-        $attachmentModel = $this->getModelFromCache('XenForo_Model_Attachment');
-        $attachmentConstraints = $attachmentModel->getAttachmentConstraints();
+        if (empty($slot['slot_id'])
+            || empty($optionKey)
+        ) {
+            return array();
+        }
 
-        $attachmentConstraints['extensions'] = array('jpg', 'jpeg', 'jpe', 'png', 'gif');
+        return array(
+            'extensions' => array('jpg', 'jpeg', 'jpe', 'png', 'gif'),
+        );
+    }
 
-        return $attachmentConstraints;
+    public function assertUploadedFile(array $slot, $optionKey, XenForo_Upload $file)
+    {
+        return true;
     }
 
     public function verifyAdOptions(bdAd_DataWriter_Ad $dw, array $slot, array $adOptions)
@@ -207,11 +214,7 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
     protected function _prepareAdHtml_helperUploadUrl(array $ad, $optionKey)
     {
         if (isset($ad['safeAttachments'][$optionKey])) {
-            if (!empty($ad['safeAttachments'][$optionKey]['thumbnailUrl'])) {
-                return $ad['safeAttachments'][$optionKey]['thumbnailUrl'];
-            } else {
-                return XenForo_Link::buildPublicLink('attachments', $ad['safeAttachments'][$optionKey]);
-            }
+            return XenForo_Link::buildPublicLink('attachments', $ad['safeAttachments'][$optionKey]);
         }
 
         return '';

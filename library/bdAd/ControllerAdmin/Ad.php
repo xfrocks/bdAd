@@ -208,7 +208,7 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
 
         $optionKey = $this->_input->filterSingle('option_key', XenForo_Input::STRING);
         $slotObj = bdAd_Slot_Abstract::create($slot['slot_class']);
-        if (!$slotObj->allowUpload($optionKey)) {
+        if (!$slotObj->allowUpload($slot, $optionKey)) {
             return $this->responseNoPermission();
         }
 
@@ -221,9 +221,15 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
                 );
             }
 
-            $file->setConstraints($slotObj->getUploadConstraints($optionKey));
+            $file->setConstraints($slotObj->getUploadConstraints($slot, $optionKey));
             if (!$file->isValid()) {
                 return $this->responseError($file->getErrors());
+            }
+
+            try {
+                $slotObj->assertUploadedFile($slot, $optionKey, $file);
+            } catch (XenForo_Exception $e) {
+                return $this->responseError($e->getMessage());
             }
 
             /** @var XenForo_Model_Attachment $attachmentModel */

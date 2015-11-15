@@ -20,14 +20,14 @@ class bdAd_Slot_Thread extends bdAd_Slot_Abstract
         return $template;
     }
 
-    public function allowUpload($optionKey)
+    public function allowUpload(array $slot, $optionKey)
     {
         switch ($optionKey) {
             case 'avatar':
                 return true;
         }
 
-        return parent::allowUpload($optionKey);
+        return parent::allowUpload($slot, $optionKey);
     }
 
     public function verifyAdOptions(bdAd_DataWriter_Ad $dw, array $slot, array $adOptions)

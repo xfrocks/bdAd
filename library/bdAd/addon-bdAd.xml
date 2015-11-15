@@ -501,11 +501,33 @@
 				 placeholder="{xen:phrase bdad_username}"
 				 hint="{xen:phrase optional}"
 				 explain="{xen:phrase bdad_slot_options_username_explain, 'phrase={xen:phrase bdad_username}'}" />]]></template>
-    <template title="bdad_slot_options__widget"><![CDATA[<xen:selectunit label="{xen:phrase bdad_ad_layout}:" name="{$inputPrefix}[adLayout]" value="{$slotOptions.adLayout}">
+    <template title="bdad_slot_options__widget"><![CDATA[<xen:radiounit label="{xen:phrase bdad_ad_layout}:" name="{$inputPrefix}[adLayout]" value="{$slotOptions.adLayout}">
 	<xen:option value="text">{xen:phrase bdad_ad_layout_text}</xen:option>
-	<xen:option value="image">{xen:phrase bdad_ad_layout_image}</xen:option>
+	
+	<xen:option value="image" label="{xen:phrase bdad_ad_layout_image}" inputclass="Hider">
+		<xen:disabled>
+			<div>
+				{xen:phrase width}:
+				<xen:spinbox name="{$inputPrefix}[width]" min="0" step="50"
+							 value="{xen:if '{$slotOptions.adLayout} === "image"', $slotOptions.width, 230}" />
+			</div>
+			
+			<div>
+				{xen:phrase height}:
+				<xen:spinbox name="{$inputPrefix}[height]" min="0" step="50"
+							 value="{xen:if '{$slotOptions.adLayout} === "image"', $slotOptions.height, 230}" />
+			</div>
+			
+			<xen:checkbox>
+				<xen:option label="{xen:phrase bdad_show_placeholder_image}"
+						name="{$inputPrefix}[placeholder]" value="1"
+						selected="{xen:if '{$slotOptions.adLayout} === "image"', $slotOptions.placeholder, 1}" />
+			</xen:checkbox>
+		</xen:disabled>
+	</xen:option>
+	
 	<xen:option value="html">{xen:phrase bdad_ad_layout_html}</xen:option>
-</xen:selectunit>
+</xen:radiounit>
 
 <input type="hidden" name="{$inputPrefix}[widgetId]]" value="{$slotOptions.widgetId}" />]]></template>
     <template title="bdad_widget_options_slot"><![CDATA[<xen:include template="bdad_slot_options__widget">
@@ -573,11 +595,15 @@
     <phrase title="bdad_enabled_forums" version_id="1" version_string="0.9-dev"><![CDATA[Enabled Forums]]></phrase>
     <phrase title="bdad_enable_slot" version_id="1" version_string="0.9-dev"><![CDATA[Enable Slot]]></phrase>
     <phrase title="bdad_link" version_id="1" version_string="0.9-dev"><![CDATA[Link]]></phrase>
+    <phrase title="bdad_please_upload_image_dimension_x_y" version_id="2" version_string="1.0.0"><![CDATA[Please upload a {width}x{height} image. You may upload a larger image but it must have the same width / height ratio.]]></phrase>
+    <phrase title="bdad_please_upload_image_height_x" version_id="2" version_string="1.0.0"><![CDATA[Please upload an image with the minimum height of {height}px.]]></phrase>
+    <phrase title="bdad_please_upload_image_width_x" version_id="2" version_string="1.0.0"><![CDATA[Please upload an image with the minimum width of {width}px.]]></phrase>
     <phrase title="bdad_post_index" version_id="1" version_string="0.9-dev"><![CDATA[Post Index]]></phrase>
     <phrase title="bdad_post_index_explain" version_id="1" version_string="0.9-dev"><![CDATA[Select position (in post list, search result list) below which ads will be served. Please note that index starts from 0 (zero).
 ]]></phrase>
     <phrase title="bdad_save_then_edit_to_upload_file" version_id="1" version_string="0.9-dev"><![CDATA[Save the ad then edit it to upload file.]]></phrase>
     <phrase title="bdad_serve_in_search" version_id="1" version_string="0.9-dev"><![CDATA[Serve ads in search]]></phrase>
+    <phrase title="bdad_show_placeholder_image" version_id="2" version_string="1.0.0"><![CDATA[Show placeholder image]]></phrase>
     <phrase title="bdad_slot" version_id="1" version_string="0.9-dev"><![CDATA[Slot]]></phrase>
     <phrase title="bdad_slots" version_id="1" version_string="0.9-dev"><![CDATA[Slots]]></phrase>
     <phrase title="bdad_slot_add" version_id="1" version_string="0.9-dev"><![CDATA[Add New Slot]]></phrase>
@@ -788,6 +814,12 @@
 			</xen:if>
 		</div>
 	</xen:hook>
+<xen:elseif is="{$widget.options.slotOptions.adLayout} == 'image'" />
+	<xen:if is="!!{$widget.options.slotOptions.placeholder}
+				&& {$widget.options.slotOptions.width} > 0
+				&& {$widget.options.slotOptions.height} > 0">
+		<img src="https://placehold.it/{$widget.options.slotOptions.width}x{$widget.options.slotOptions.height}" />
+	</xen:if>
 </xen:if>]]></template>
   </templates>
   <public_template_modifications>
