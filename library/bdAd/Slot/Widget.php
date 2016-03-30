@@ -227,40 +227,16 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
 
     protected function _prepareAdHtml_gpt_getDisplayCode(array $ad, array $slot)
     {
-        $divId = sprintf('bdAd-gpt-slot-%d-ad-%d', $slot['slot_id'], $ad['ad_id']);
+        $divId = bdAd_Engine::gpt_getContainerElementId($ad);
         $style = '';
-        $slotSize = '[]';
         if (!empty($ad['ad_options']['sizeWidth']) && !empty($ad['ad_options']['sizeHeight'])) {
             $style = sprintf(' style="width: %dpx; height: %dpx;"',
                 $ad['ad_options']['sizeWidth'], $ad['ad_options']['sizeHeight']);
-            $slotSize = sprintf('[%d, %d]', $ad['ad_options']['sizeWidth'], $ad['ad_options']['sizeHeight']);
         }
 
-        if (!isset(bdAd_Listener::$headerScripts['gpt_0'])) {
-            bdAd_Listener::$headerScripts['gpt_0'] = 'var googletag = googletag || {};'
-                . 'googletag.cmd = googletag.cmd || [];'
-                . '(function() {'
-                . 'var gads = document.createElement("script");'
-                . 'gads.async = true;'
-                . 'gads.type = "text/javascript";'
-                . 'var useSSL = "https:" == document.location.protocol;'
-                . 'gads.src = (useSSL ? "https:" : "http:") + "//www.googletagservices.com/tag/js/gpt.js";'
-                . 'var node =document.getElementsByTagName("script")[0];'
-                . 'node.parentNode.insertBefore(gads, node);'
-                . ' })();';
-
-            bdAd_Listener::$headerScripts['gpt_1'] = 'googletag.cmd.push(function() {';
-
-            bdAd_Listener::$headerScripts['gpt_9'] = 'googletag.pubads().enableSingleRequest();'
-                . 'googletag.enableServices();'
-                . '});';
+        if (!bdAd_Option::get('gptStaticJs')) {
+            bdAd_Engine::gpt_generateBootstrapJs($ad, bdAd_Listener::$headerScripts);
         }
-
-        bdAd_Listener::$headerScripts['gpt_5_' . $divId] = sprintf('googletag.defineSlot(%1$s, %2$s, %3$s)'
-            . '.addService(googletag.pubads());',
-            json_encode($ad['ad_options']['adUnitPath']),
-            $slotSize,
-            json_encode($divId));
 
         bdAd_Engine::getInstance()->markServed($slot['slot_id'], $ad['ad_id']);
 

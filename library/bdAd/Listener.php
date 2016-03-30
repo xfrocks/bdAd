@@ -2,8 +2,6 @@
 
 class bdAd_Listener
 {
-    const UPDATER_URL = 'https://xfrocks.com/api/index.php?updater';
-
     public static $adHasBeenServed = false;
     public static $headerScripts = array();
 
@@ -33,7 +31,7 @@ class bdAd_Listener
             'helperEngine',
         );
 
-        bdAd_ShippableHelper_Updater::onInitDependencies($dependencies, self::UPDATER_URL);
+        bdAd_ShippableHelper_Updater::onInitDependencies($dependencies, bdAd_Option::UPDATER_URL);
     }
 
     public static function template_post_render_PAGE_CONTAINER(

@@ -2,11 +2,11 @@
 
 class bdAd_Engine
 {
-    const VERSION = 2015102202;
+    const VERSION = 2016033001;
     const DATA_REGISTRY_ACTIVE_ADS = 'bdAd_activeAds';
     const SIMPLE_CACHE_ACTIVE_SLOT_CLASSES = 'bdAd_activeSlotClasses';
 
-    public static function refreshActiveAds(bdAd_Model_Slot $slotModel)
+    public static function refreshActiveAds(bdAd_Model_Slot $slotModel, array $options = array())
     {
         $slots = $slotModel->getSlots(array('active' => 1));
 
@@ -19,19 +19,39 @@ class bdAd_Engine
             'version' => self::VERSION,
             'slots' => array(),
             'adsGrouped' => array(),
+            'gptStaticJs' => false,
         );
+        $gptAds = array();
 
         $activeSlotClasses = array();
         foreach ($ads as $adId => $ad) {
-            if (isset($slots[$ad['slot_id']])) {
-                $ad = $adModel->prepareAdPhrasesForCaching($ad);
-
-                $data['slots'][$ad['slot_id']] = $slots[$ad['slot_id']];
-                $data['adsGrouped'][$ad['slot_id']][$adId] = $ad;
-                $activeSlotClasses[] = $slots[$ad['slot_id']]['slot_class'];
+            if (!isset($slots[$ad['slot_id']])) {
+                continue;
             }
+
+            $ad = $adModel->prepareAdPhrasesForCaching($ad);
+            $slotRef =& $slots[$ad['slot_id']];
+
+            $data['slots'][$slotRef['slot_id']] = $slotRef;
+            $data['adsGrouped'][$slotRef['slot_id']][$adId] = $ad;
+            $activeSlotClasses[] = $slots[$ad['slot_id']]['slot_class'];
+
+            if ($slotRef['slot_class'] == 'bdAd_Slot_Widget'
+                && !empty($slotRef['slot_options']['adLayout'])
+                && $slotRef['slot_options']['adLayout'] === 'gpt'
+            ) {
+                $gptAds[$adId] = $ad;
+            }
+
         }
         $activeSlotClasses = array_unique($activeSlotClasses);
+
+
+        if (!empty($options['gptStaticJs'])
+            || bdAd_Option::get('gptStaticJs')
+        ) {
+            $data['gptStaticJs'] = self::gpt_generateStaticJs($gptAds);
+        }
 
         /** @var XenForo_Model_DataRegistry $dataRegistryModel */
         $dataRegistryModel = $slotModel->getModelFromCache('XenForo_Model_DataRegistry');
@@ -96,6 +116,78 @@ class bdAd_Engine
         $contents = implode('', $adHtmls);
     }
 
+    public static function gpt_getContainerElementId(array $ad)
+    {
+        return sprintf('bdAd-gpt-slot-%d-ad-%d', $ad['slot_id'], $ad['ad_id']);
+    }
+
+    public static function gpt_generateBootstrapJs(array $ad, array &$scripts)
+    {
+        if (!isset($scripts['gpt_0'])) {
+            $scripts['gpt_0'] = 'var googletag = googletag || {};'
+                . 'googletag.cmd = googletag.cmd || [];'
+                . '(function() {'
+                . 'var gads = document.createElement("script");'
+                . 'gads.async = true;'
+                . 'gads.type = "text/javascript";'
+                . 'var useSSL = "https:" == document.location.protocol;'
+                . 'gads.src = (useSSL ? "https:" : "http:") + "//www.googletagservices.com/tag/js/gpt.js";'
+                . 'var node =document.getElementsByTagName("script")[0];'
+                . 'node.parentNode.insertBefore(gads, node);'
+                . ' })();';
+
+            $scripts['gpt_1'] = 'googletag.cmd.push(function() {';
+
+            $scripts['gpt_9'] = 'googletag.pubads().enableSingleRequest();'
+                . 'googletag.enableServices();'
+                . '});';
+        }
+
+        $containerElementId = self::gpt_getContainerElementId($ad);
+        $adSize = 'null';
+        if (!empty($ad['ad_options']['sizeWidth'])
+            && !empty($ad['ad_options']['sizeHeight'])
+        ) {
+            $adSize = sprintf('[%d, %d]', $ad['ad_options']['sizeWidth'], $ad['ad_options']['sizeHeight']);
+        }
+        $scripts['gpt_5_' . $containerElementId] = sprintf('googletag.defineSlot(%1$s, %2$s, %3$s)'
+            . '.addService(googletag.pubads());',
+            json_encode($ad['ad_options']['adUnitPath']),
+            $adSize,
+            json_encode($containerElementId));
+    }
+
+    public static function gpt_generateStaticJs(array $ads)
+    {
+        $scripts = array();
+        foreach ($ads as $ad) {
+            self::gpt_generateBootstrapJs($ad, $scripts);
+        }
+        ksort($scripts);
+
+        $path = self::gpt_getStaticJsPath();
+        XenForo_Helper_File::createDirectory(dirname($path));
+        if (!file_put_contents($path, implode('', $scripts))) {
+            return 0;
+        }
+
+        XenForo_Helper_File::makeWritableByFtpUser($path);
+        return time();
+    }
+
+    public static function gpt_getStaticJsPath($prefix = null)
+    {
+        if ($prefix === null) {
+            $prefix = XenForo_Helper_File::getExternalDataPath();
+        }
+        return $prefix . '/ads/gpt.js';
+    }
+
+    public static function gpt_getStaticJsUrl()
+    {
+        return self::getInstance()->getGptStaticJsUrl();
+    }
+
     /**
      * @return bdAd_Engine
      */
@@ -132,6 +224,7 @@ class bdAd_Engine
     private $_dataRegistryModel;
     private $_slots = array();
     private $_adsGrouped = array();
+    private $_gptStaticJs = false;
     private $_servedSlots = array();
     private $_servedAds = array();
 
@@ -147,6 +240,10 @@ class bdAd_Engine
 
         if (!empty($data['adsGrouped'])) {
             $this->_adsGrouped = $data['adsGrouped'];
+        }
+
+        if (isset($data['gptStaticJs'])) {
+            $this->_gptStaticJs = $data['gptStaticJs'];
         }
 
         $this->_updateActiveSlotClasses();
@@ -258,6 +355,12 @@ class bdAd_Engine
     public function getServedAdIds()
     {
         return array_keys($this->_servedAds);
+    }
+
+    public function getGptStaticJsUrl()
+    {
+        return sprintf('%s?%d', self::gpt_getStaticJsPath(XenForo_Application::$externalDataUrl),
+            $this->_gptStaticJs);
     }
 
     private function _updateActiveSlotClasses()
