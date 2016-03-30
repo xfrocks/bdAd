@@ -285,11 +285,16 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         $widthMapping = array();
         $widthMapping[$wideWidth] = $wideWidth - $sidebarWidth - $contentPadding;
         $widthMapping[$mediumWidth] = $mediumWidth - $contentPadding;
-        $widthMapping[$narrowWidth] = $narrowWidth - $contentPadding;
+        $widthMapping[$narrowWidth] = $narrowWidth - $contentPadding / 2;
 
         foreach (array_keys($adsByWidth) as $adWidth) {
-            if ($adsByWidth > $widthMapping[$wideWidth]) {
+            if ($adWidth > $widthMapping[$wideWidth]) {
                 $adRequiredClientWidth = $adWidth + $sidebarWidth + $contentPadding;
+                $widthMapping[$adRequiredClientWidth] = $adWidth;
+            }
+
+            if ($adWidth < $widthMapping[$narrowWidth]) {
+                $adRequiredClientWidth = $adWidth + $contentPadding / 2;
                 $widthMapping[$adRequiredClientWidth] = $adWidth;
             }
         }
@@ -300,7 +305,6 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
             foreach (array_keys($adsByWidth) as $adWidth) {
                 if ($adWidth <= $usableWidth) {
                     $ad = $adsByWidth[$adWidth];
-                    unset($adsByWidth[$adWidth]);
                     break;
                 }
             }
