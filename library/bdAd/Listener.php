@@ -5,6 +5,7 @@ class bdAd_Listener
     const UPDATER_URL = 'https://xfrocks.com/api/index.php?updater';
 
     public static $adHasBeenServed = false;
+    public static $headerScripts = array();
 
     public static function load_class($class, array &$extend)
     {
@@ -33,6 +34,25 @@ class bdAd_Listener
         );
 
         bdAd_ShippableHelper_Updater::onInitDependencies($dependencies, self::UPDATER_URL);
+    }
+
+    public static function template_post_render_PAGE_CONTAINER(
+        /** @noinspection PhpUnusedParameterInspection */
+        $templateName,
+        &$content,
+        array &$containerData,
+        XenForo_Template_Abstract $template
+    ) {
+        if (!count(self::$headerScripts)) {
+            return;
+        }
+
+        ksort(self::$headerScripts);
+
+        /** @noinspection BadExpressionStatementJS */
+        $headerScripts = sprintf('<script>%s</script>', implode('', self::$headerScripts));
+        $search = '<!--XenForo_Require:JS-->';
+        $content = str_replace($search, $search . $headerScripts, $content);
     }
 
     public static function widget_framework_ready(array &$renderers)

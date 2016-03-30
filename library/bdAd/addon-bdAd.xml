@@ -237,11 +237,18 @@
 		<xen:set var="$label">{xen:phrase bdad_ad_image}</xen:set>
 		<xen:set var="$hint">{xen:phrase optional}</xen:set>
 	</xen:include>
-<xen:elseif is="{$slot.slot_options.adLayout} == 'html'"/>
+<xen:elseif is="{$slot.slot_options.adLayout} == 'html'" />
 	<div class="baseHtml"><ul><li>{xen:phrase bdad_ad_layout}: {xen:phrase bdad_ad_layout_html}</li></ul></div>
 	
 	<xen:textboxunit label="{xen:phrase html}:" name="ad_options[html]" value="{$ad.ad_options.html}"
 					 rows="5" inputclass="Elastic" />
+<xen:elseif is="{$slot.slot_options.adLayout} == 'gpt'" />
+	<xen:textboxunit label="{xen:phrase bdad_ad_unit_path}:" name="ad_options[adUnitPath]" value="{$ad.ad_options.adUnitPath}"
+					 placeholder="/1234/targeted/ad/unit" />
+	<xen:textboxunit label="{xen:phrase width}:" name="ad_options[sizeWidth]" value="{$ad.ad_options.sizeWidth}"
+					 placeholder="728" />
+	<xen:textboxunit label="{xen:phrase height}:" name="ad_options[sizeHeight]" value="{$ad.ad_options.sizeHeight}"
+					 placeholder="90" />
 <xen:else />
 	<div class="baseHtml"><ul><li>{xen:phrase bdad_ad_layout}: {xen:phrase bdad_ad_layout_text}</li></ul></div>
 	
@@ -527,6 +534,16 @@
 	</xen:option>
 	
 	<xen:option value="html">{xen:phrase bdad_ad_layout_html}</xen:option>
+
+	<xen:option value="gpt" label="{xen:phrase bdad_ad_layout_gpt}" inputclass="Hider">
+		<xen:disabled>
+			<xen:checkbox>
+				<xen:option label="{xen:phrase bdad_responsive_ads}"
+						name="{$inputPrefix}[responsiveAds]" value="1"
+						selected="{xen:if '{$slotOptions.adLayout} === "gpt"', $slotOptions.responsiveAds, 1}" />
+			</xen:checkbox>
+		</xen:disabled>
+	</xen:option>
 </xen:radiounit>
 
 <input type="hidden" name="{$inputPrefix}[widgetId]]" value="{$slotOptions.widgetId}" />]]></template>
@@ -547,6 +564,7 @@
     <listener event_id="load_class_model" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="load_class_view" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="template_hook" execute_order="10" callback_class="bdAd_Engine" callback_method="onTemplateHook" active="1" hint="bdad_hook" description="bdAd_Engine::onTemplateHook($hookName=bdad_hook,...)"/>
+    <listener event_id="template_post_render" execute_order="10" callback_class="bdAd_Listener" callback_method="template_post_render_PAGE_CONTAINER" active="1" hint="PAGE_CONTAINER" description=""/>
     <listener event_id="widget_framework_ready" execute_order="10" callback_class="bdAd_Listener" callback_method="widget_framework_ready" active="1" hint="" description=""/>
   </code_event_listeners>
   <cron>
@@ -579,6 +597,7 @@
     <phrase title="bdad_ad_image" version_id="1" version_string="0.9-dev"><![CDATA[Ad Image]]></phrase>
     <phrase title="bdad_ad_is_active" version_id="1" version_string="0.9-dev"><![CDATA[Ad is active]]></phrase>
     <phrase title="bdad_ad_layout" version_id="1" version_string="0.9-dev"><![CDATA[Ad Layout]]></phrase>
+    <phrase title="bdad_ad_layout_gpt" version_id="1000100" version_string="1.0.1"><![CDATA[Google Publisher Tag]]></phrase>
     <phrase title="bdad_ad_layout_html" version_id="1" version_string="0.9-dev"><![CDATA[HTML]]></phrase>
     <phrase title="bdad_ad_layout_image" version_id="1" version_string="0.9-dev"><![CDATA[Image]]></phrase>
     <phrase title="bdad_ad_layout_text" version_id="1" version_string="0.9-dev"><![CDATA[Text]]></phrase>
@@ -588,9 +607,11 @@
     <phrase title="bdad_ad_options" version_id="1" version_string="0.9-dev"><![CDATA[Ad Options]]></phrase>
     <phrase title="bdad_ad_options_cannot_verified" version_id="1" version_string="0.9-dev"><![CDATA[Ad options cannot be verified.]]></phrase>
     <phrase title="bdad_ad_options_error_link_required" version_id="1" version_string="0.9-dev"><![CDATA[Link is required and must be a valid URL.]]></phrase>
+    <phrase title="bdad_ad_options_error_option_x_required" version_id="1000100" version_string="1.0.1"><![CDATA[Option {option} cannot be left empty.]]></phrase>
     <phrase title="bdad_ad_please_confirm" version_id="1" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following ad]]></phrase>
     <phrase title="bdad_ad_save" version_id="1" version_string="0.9-dev"><![CDATA[Save Ad]]></phrase>
     <phrase title="bdad_ad_title" version_id="1" version_string="0.9-dev"><![CDATA[Title]]></phrase>
+    <phrase title="bdad_ad_unit_path" version_id="1000100" version_string="1.0.1"><![CDATA[Ad Unit Path]]></phrase>
     <phrase title="bdad_ad_x" version_id="1" version_string="0.9-dev"><![CDATA[Ad #{number}]]></phrase>
     <phrase title="bdad_enabled_forums" version_id="1" version_string="0.9-dev"><![CDATA[Enabled Forums]]></phrase>
     <phrase title="bdad_enable_slot" version_id="1" version_string="0.9-dev"><![CDATA[Enable Slot]]></phrase>
@@ -601,6 +622,7 @@
     <phrase title="bdad_post_index" version_id="1" version_string="0.9-dev"><![CDATA[Post Index]]></phrase>
     <phrase title="bdad_post_index_explain" version_id="1" version_string="0.9-dev"><![CDATA[Select position (in post list, search result list) below which ads will be served. Please note that index starts from 0 (zero).
 ]]></phrase>
+    <phrase title="bdad_responsive_ads" version_id="1000100" version_string="1.0.1"><![CDATA[Responsive Ads]]></phrase>
     <phrase title="bdad_save_then_edit_to_upload_file" version_id="1" version_string="0.9-dev"><![CDATA[Save the ad then edit it to upload file.]]></phrase>
     <phrase title="bdad_serve_in_search" version_id="1" version_string="0.9-dev"><![CDATA[Serve ads in search]]></phrase>
     <phrase title="bdad_show_placeholder_image" version_id="2" version_string="1.0.0"><![CDATA[Show placeholder image]]></phrase>
@@ -649,7 +671,7 @@
   </route_prefixes>
   <style_properties/>
   <templates>
-    <template title="bdad.css" version_id="1" version_string="0.9-dev"><![CDATA[.discussionListItem.adAsThread .listBlock { background-color: #ffffec; }
+    <template title="bdad.css" version_id="1000100" version_string="1.0.1"><![CDATA[.discussionListItem.adAsThread .listBlock { background-color: #ffffec; }
 .discussionList .adAsThread .lastPost { text-align: center; }
 .adAsThread .lastPost > span {
 	background: #efc439;
@@ -667,7 +689,9 @@
 .searchResult.adAsPost { background-color: #ffffec; }
 .searchResult.adAsPost .avatar img { max-width: 48px; max-height: 48px; }
 
-.adWidget-image img { width: 100%; }]]></template>
+.adWidget-image img { width: 100%; }
+.adWidget-gpt { overflow: hidden; width: 100%; }
+.adWidget-gpt > .adContainer { margin: 0 auto; }]]></template>
     <template title="bdad_post" version_id="2" version_string="1.0.0"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Post,
 	post, $forum, $thread, $post}</xen:set>
 <xen:if is="{$adIds}">
@@ -798,7 +822,7 @@
 </xen:if>
 
 <xen:edithint template="thread_list_item" />]]></template>
-    <template title="bdad_widget_slot" version_id="2" version_string="1.0.0"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Widget, $widget.options.slotId}</xen:set>
+    <template title="bdad_widget_slot" version_id="1000100" version_string="1.0.1"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Widget, $widget.options.slotId}</xen:set>
 <xen:if is="{$adIds}">
 	<xen:require css="bdad.css" />
 
@@ -808,6 +832,8 @@
 				<a href="{link}" rel="nofollow"><img src="{imageUrl}" /></a>
 			<xen:elseif is="{$widget.options.slotOptions.adLayout} == 'html'"/>
 				{html}
+			<xen:elseif is="{$widget.options.slotOptions.adLayout} == 'gpt'"/>
+				{googletag.display}
 			<xen:else />
 				<h4><a href="{link}" rel="nofollow">{title}</a></h4>
 				<p>{description}</p>

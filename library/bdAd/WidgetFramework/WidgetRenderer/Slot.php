@@ -11,6 +11,7 @@ class bdAd_WidgetFramework_WidgetRenderer_Slot extends WidgetFramework_WidgetRen
                 'slotOptions' => XenForo_Input::ARRAY_SIMPLE,
             ),
             'canAjaxLoad' => true,
+            'useWrapper' => false,
         );
     }
 

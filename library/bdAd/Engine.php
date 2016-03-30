@@ -168,7 +168,21 @@ class bdAd_Engine
     public function getAdsBySlotId($slotId)
     {
         if (isset($this->_adsGrouped[$slotId])) {
-            return $this->_adsGrouped[$slotId];
+            $ads = array();
+
+            $visitor = XenForo_Visitor::getInstance()->toArray();
+            foreach ($this->_adsGrouped[$slotId] as $adId => $ad) {
+                if (!empty($ad['ad_config_options']['user_criteria'])
+                    && !XenForo_Helper_Criteria::userMatchesCriteria(
+                        $ad['ad_config_options']['user_criteria'], true, $visitor)
+                ) {
+                    continue;
+                }
+
+                $ads[$adId] = $ad;
+            }
+
+            return $ads;
         }
 
         return array();
