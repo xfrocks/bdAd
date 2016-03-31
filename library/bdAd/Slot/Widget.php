@@ -292,10 +292,13 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                 $displayCode .= ' else ';
             }
 
-            $displayCode .= sprintf('if (clientWidth > %d) {'
-                . 'document.write(%2$s);'
+            $displayCodeOriginal = $this->_prepareAdHtml_gpt_getDisplayCode($ad, $slot);
+            $displayCodeNoScript = str_replace('script', 'scr_ipt', $displayCodeOriginal);
+
+            $displayCode .= sprintf('if (clientWidth > %1$d) {'
+                . 'document.write(%2$s.replace(/scr_ipt/g, "script"));'
                 . '}', $clientWidth,
-                json_encode($this->_prepareAdHtml_gpt_getDisplayCode($ad, $slot)));
+                json_encode($displayCodeNoScript));
         }
 
         return sprintf('<' . 'script>(function() {'
