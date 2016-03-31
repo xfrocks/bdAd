@@ -541,6 +541,9 @@
 				<xen:option label="{xen:phrase bdad_responsive_ads}"
 						name="{$inputPrefix}[responsiveAds]" value="1"
 						selected="{xen:if '{$slotOptions.adLayout} === "gpt"', $slotOptions.responsiveAds, 1}" />
+				<xen:option label="{xen:phrase bdad_hide_non_sidebar}"
+						name="{$inputPrefix}[hideNonSidebar]" value="1"
+						selected="{$slotOptions.hideNonSidebar}" />
 			</xen:checkbox>
 		</xen:disabled>
 	</xen:option>
@@ -623,6 +626,7 @@
     <phrase title="bdad_ad_x" version_id="1" version_string="0.9-dev"><![CDATA[Ad #{number}]]></phrase>
     <phrase title="bdad_enabled_forums" version_id="1" version_string="0.9-dev"><![CDATA[Enabled Forums]]></phrase>
     <phrase title="bdad_enable_slot" version_id="1" version_string="0.9-dev"><![CDATA[Enable Slot]]></phrase>
+    <phrase title="bdad_hide_non_sidebar" version_id="1010000" version_string="1.1.0"><![CDATA[Hide For Non-Sidebar Browser]]></phrase>
     <phrase title="bdad_link" version_id="1" version_string="0.9-dev"><![CDATA[Link]]></phrase>
     <phrase title="bdad_please_upload_image_dimension_x_y" version_id="2" version_string="1.0.0"><![CDATA[Please upload a {width}x{height} image. You may upload a larger image but it must have the same width / height ratio.]]></phrase>
     <phrase title="bdad_please_upload_image_height_x" version_id="2" version_string="1.0.0"><![CDATA[Please upload an image with the minimum height of {height}px.]]></phrase>
@@ -647,6 +651,7 @@
     <phrase title="bdad_slot_not_found" version_id="1" version_string="0.9-dev"><![CDATA[The requested slot could not be found]]></phrase>
     <phrase title="bdad_slot_no_results" version_id="1" version_string="0.9-dev"><![CDATA[No slot could be found...]]></phrase>
     <phrase title="bdad_slot_options_cannot_verified" version_id="1" version_string="0.9-dev"><![CDATA[Slot options cannot be verified.]]></phrase>
+    <phrase title="bdad_slot_options_error_cannot_both_responsive_non_sidebar" version_id="1010000" version_string="1.1.0"><![CDATA[Cannot enable both Responsive Ads and Hide For Non-Sidebar options.]]></phrase>
     <phrase title="bdad_slot_options_error_widget_id_required" version_id="1" version_string="0.9-dev"><![CDATA[The associated widget must be specified.]]></phrase>
     <phrase title="bdad_slot_options_forum_ids_explain" version_id="1" version_string="0.9-dev"><![CDATA[Select forums in which ads should be served. Select none to enable ads for all forums.]]></phrase>
     <phrase title="bdad_slot_options_search_toggle" version_id="1" version_string="0.9-dev"><![CDATA[Check this box to serve ads in search results page]]></phrase>

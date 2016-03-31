@@ -8,6 +8,17 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
             $dw->error(new XenForo_Phrase('bdad_slot_options_error_widget_id_required'), 'slot_options');
         }
 
+        switch ($slotOptions['adLayout']) {
+            case 'gpt':
+                if (!empty($slotOptions['responsiveAds'])
+                    && !empty($slotOptions['hideNonSidebar'])
+                ) {
+                    $dw->error(new XenForo_Phrase('bdad_slot_options_error_cannot_both_responsive_non_sidebar'),
+                        'slot_options');
+                }
+                break;
+        }
+
         return parent::verifySlotOptions($dw, $slotOptions);
     }
 
@@ -191,6 +202,10 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
 
     protected function _prepareAdHtml_gpt_render(array $ad, array $slot)
     {
+        if (!empty($slot['slot_options']['hideNonSidebar'])) {
+            return $this->_prepareAdHtml_gpt_getHideNonSidebarDisplayCode($ad, $slot);
+        }
+
         if (empty($slot['slot_options']['responsiveAds'])) {
             return $this->_prepareAdHtml_gpt_getDisplayCode($ad, $slot);
         }
@@ -244,6 +259,20 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         return sprintf('<div id="%1$s" class="adContainer"%2$s>'
             . '<script>googletag.cmd.push(function(){'
             . 'googletag.display("%1$s");});</script></div>', $divId, $style);
+    }
+
+    protected function _prepareAdHtml_gpt_getHideNonSidebarDisplayCode(array $ad, array $slot)
+    {
+        $wideWidth = intval(XenForo_Template_Helper_Core::styleProperty('maxResponsiveWideWidth'));
+
+        $displayCodeOriginal = $this->_prepareAdHtml_gpt_getDisplayCode($ad, $slot);
+        $displayCodeNoScript = str_replace('script', 'scr_ipt', $displayCodeOriginal);
+
+        return sprintf('<' . 'script>(function() {'
+            . 'if (document.documentElement.clientWidth > %1$d) {'
+            . 'document.write(%2$s.replace(/scr_ipt/g, "script"));'
+            . '}'
+            . '})();</script>', $wideWidth, json_encode($displayCodeNoScript));
     }
 
     protected function _prepareAdHtml_gpt_getResponsiveDisplayCode(array $adsByWidth, array $slot)
