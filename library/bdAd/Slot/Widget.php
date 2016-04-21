@@ -79,10 +79,11 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                     $fileHeight = intval($file->getImageInfoField('height'));
                     if ($width > 0 && $height > 0) {
                         if ($fileWidth < $width || $fileHeight < $height) {
-                            throw new XenForo_Exception(new XenForo_Phrase('bdad_please_upload_image_dimension_x_y', array(
-                                'width' => $width,
-                                'height' => $height,
-                            )));
+                            throw new XenForo_Exception(new XenForo_Phrase('bdad_please_upload_image_dimension_x_y',
+                                array(
+                                    'width' => $width,
+                                    'height' => $height,
+                                )));
                         }
                     } elseif ($width > 0) {
                         if ($fileWidth < $width) {
@@ -255,8 +256,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
 
         bdAd_Engine::getInstance()->markServed($slot['slot_id'], $ad['ad_id']);
 
-        /** @noinspection HtmlUnknownAttribute */
-        return sprintf('<div id="%1$s" class="adContainer"%2$s>'
+        return sprintf('<' . 'div id="%1$s" class="adContainer"%2$s>'
             . '<script>googletag.cmd.push(function(){'
             . 'googletag.display("%1$s");});</script></div>', $divId, $style);
     }
@@ -278,8 +278,6 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
     protected function _prepareAdHtml_gpt_getResponsiveDisplayCode(array $adsByWidth, array $slot)
     {
         krsort($adsByWidth);
-        $displayCode = '';
-
         $wideWidth = intval(XenForo_Template_Helper_Core::styleProperty('maxResponsiveWideWidth'));
         $mediumWidth = intval(XenForo_Template_Helper_Core::styleProperty('maxResponsiveMediumWidth'));
         $narrowWidth = intval(XenForo_Template_Helper_Core::styleProperty('maxResponsiveNarrowWidth'));
@@ -289,8 +287,8 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
 
         $widthMapping = array();
         $widthMapping[$wideWidth] = $wideWidth - $sidebarWidth - $contentPadding;
-        $widthMapping[$mediumWidth] = $mediumWidth - $contentPadding;
-        $widthMapping[$narrowWidth] = $narrowWidth - $contentPadding / 2;
+        $widthMapping[$mediumWidth] = $mediumWidth - $contentPadding / 2;
+        $widthMapping[$narrowWidth] = $narrowWidth;
 
         foreach (array_keys($adsByWidth) as $adWidth) {
             if ($adWidth > $widthMapping[$wideWidth]) {
@@ -299,12 +297,13 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
             }
 
             if ($adWidth < $widthMapping[$narrowWidth]) {
-                $adRequiredClientWidth = $adWidth + $contentPadding / 2;
+                $adRequiredClientWidth = $adWidth;
                 $widthMapping[$adRequiredClientWidth] = $adWidth;
             }
         }
         krsort($widthMapping);
 
+        $widthToAd = array();
         foreach ($widthMapping as $clientWidth => $usableWidth) {
             $ad = null;
             foreach (array_keys($adsByWidth) as $adWidth) {
@@ -317,6 +316,27 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                 continue;
             }
 
+            $widthToAd[$clientWidth] = $ad;
+        }
+
+        $prevClientWidth = -1;
+        $prevAdId = -1;
+        foreach (array_keys($widthToAd) as $clientWidth) {
+            if ($prevClientWidth === -1
+                || $prevAdId === -1
+                || $prevAdId == $widthToAd[$clientWidth]['ad_id']
+            ) {
+                if ($prevClientWidth !== -1) {
+                    unset($widthToAd[$prevClientWidth]);
+                }
+            }
+
+            $prevAdId = $widthToAd[$clientWidth]['ad_id'];
+            $prevClientWidth = $clientWidth;
+        }
+
+        $displayCode = '';
+        foreach ($widthToAd as $clientWidth => $ad) {
             if (!empty($displayCode)) {
                 $displayCode .= ' else ';
             }
