@@ -4,6 +4,7 @@ class bdAd_Listener
 {
     public static $adHasBeenServed = false;
     public static $headerScripts = array();
+    protected static $_noAd = true;
 
     public static function load_class($class, array &$extend)
     {
@@ -40,7 +41,8 @@ class bdAd_Listener
         &$content,
         array &$containerData,
         XenForo_Template_Abstract $template
-    ) {
+    )
+    {
         if (!count(self::$headerScripts)) {
             return;
         }
@@ -77,4 +79,27 @@ class bdAd_Listener
 
         return call_user_func_array($method, $args);
     }
+
+    public static function front_controller_pre_dispatch(XenForo_FrontController $fc, XenForo_RouteMatch &$routeMatch)
+    {
+        $routeMatch->getMajorSection();
+        $majorSection = $routeMatch->getMajorSection();
+
+        $listValuesOption = XenForo_Application::getOptions('bdAd_customizeDisplayAd')->getOptions('bdAd_customizeDisplayAd');
+        $checkedValues = $listValuesOption['bdAd_customizeDisplayAd'];
+
+        foreach ($checkedValues as $key => $value) {
+            if ($majorSection == $key) {
+                self::$_noAd = false;
+                self::bdAd_customizeDisplayAdCheck();
+            }
+        }
+
+    }
+
+    public static function bdAd_customizeDisplayAdCheck()
+    {
+        return self::$_noAd;
+    }
+
 }

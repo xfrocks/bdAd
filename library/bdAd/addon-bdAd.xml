@@ -561,6 +561,7 @@
   <code_events/>
   <code_event_listeners>
     <listener event_id="file_health_check" execute_order="10" callback_class="bdAd_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
+    <listener event_id="front_controller_pre_dispatch" execute_order="10" callback_class="bdAd_Listener" callback_method="front_controller_pre_dispatch" active="1" hint="" description="Customize display advertisement"/>
     <listener event_id="init_dependencies" execute_order="10" callback_class="bdAd_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
     <listener event_id="load_class_controller" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
@@ -577,6 +578,14 @@
   <email_template_modifications/>
   <optiongroups>
     <group group_id="bdAd" display_order="9999" debug_only="0"/>
+    <option option_id="bdAd_customizeDisplayAd" edit_format="checkbox" data_type="array" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params>account=account
+search=search
+members=members</edit_format_params>
+      <sub_options>*</sub_options>
+      <relation group_id="bdAd" display_order="1"/>
+    </option>
     <option option_id="bdAd_gptStaticJs" edit_format="onoff" data_type="unsigned_integer" can_backup="1" validation_class="bdAd_Option" validation_method="verifyGptStaticJs">
       <default_value>0</default_value>
       <edit_format_params></edit_format_params>
@@ -674,6 +683,8 @@
     <phrase title="bdad_x_clicks" version_id="1" version_string="0.9-dev"><![CDATA[{count} clicks]]></phrase>
     <phrase title="bdad_x_views" version_id="1" version_string="0.9-dev"><![CDATA[{count} views]]></phrase>
     <phrase title="cron_entry_bdAd_Log_runHourly" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement: Aggregate Logs Hourly]]></phrase>
+    <phrase title="option_bdAd_customizeDisplayAd" version_id="1010001" version_string="1.1.0"><![CDATA[Customize display of advertisement]]></phrase>
+    <phrase title="option_bdAd_customizeDisplayAd_explain" version_id="1010001" version_string="1.1.0"><![CDATA[]]></phrase>
     <phrase title="option_bdAd_gptStaticJs" version_id="1000100" version_string="1.0.1"><![CDATA[Static Js for Google Publisher Tag]]></phrase>
     <phrase title="option_bdAd_gptStaticJs_explain" version_id="1000100" version_string="1.0.1"><![CDATA[Enable this option to generate and use a static .js file for GPT configuration and bootstrap. By default, the system will generate this code on the fly and put it inside &lt;head /&gt; tag.]]></phrase>
     <phrase title="option_group_bdAd" version_id="1000100" version_string="1.0.1"><![CDATA[[bd] Advertisement]]></phrase>
