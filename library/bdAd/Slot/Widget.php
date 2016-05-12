@@ -278,81 +278,26 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
     protected function _prepareAdHtml_gpt_getResponsiveDisplayCode(array $adsByWidth, array $slot)
     {
         krsort($adsByWidth);
-        $wideWidth = intval(XenForo_Template_Helper_Core::styleProperty('maxResponsiveWideWidth'));
-        $mediumWidth = intval(XenForo_Template_Helper_Core::styleProperty('maxResponsiveMediumWidth'));
-        $narrowWidth = intval(XenForo_Template_Helper_Core::styleProperty('maxResponsiveNarrowWidth'));
-        $sidebarWidth = intval(XenForo_Template_Helper_Core::styleProperty('sidebar.width'));
-        $contentPadding = intval(XenForo_Template_Helper_Core::styleProperty('content.padding-left'))
-            + intval(XenForo_Template_Helper_Core::styleProperty('content.padding-right'));
-
-        $widthMapping = array();
-        $widthMapping[$wideWidth] = $wideWidth - $sidebarWidth - $contentPadding;
-        $widthMapping[$mediumWidth] = $mediumWidth - $contentPadding / 2;
-        $widthMapping[$narrowWidth] = $narrowWidth;
-
-        foreach (array_keys($adsByWidth) as $adWidth) {
-            if ($adWidth > $widthMapping[$wideWidth]) {
-                $adRequiredClientWidth = $adWidth + $sidebarWidth + $contentPadding;
-                $widthMapping[$adRequiredClientWidth] = $adWidth;
-            }
-
-            if ($adWidth < $widthMapping[$narrowWidth]) {
-                $adRequiredClientWidth = $adWidth;
-                $widthMapping[$adRequiredClientWidth] = $adWidth;
-            }
-        }
-        krsort($widthMapping);
-
-        $widthToAd = array();
-        foreach ($widthMapping as $clientWidth => $usableWidth) {
-            $ad = null;
-            foreach (array_keys($adsByWidth) as $adWidth) {
-                if ($adWidth <= $usableWidth) {
-                    $ad = $adsByWidth[$adWidth];
-                    break;
-                }
-            }
-            if (empty($ad)) {
-                continue;
-            }
-
-            $widthToAd[$clientWidth] = $ad;
-        }
-
-        $prevClientWidth = -1;
-        $prevAdId = -1;
-        foreach (array_keys($widthToAd) as $clientWidth) {
-            if ($prevClientWidth === -1
-                || $prevAdId === -1
-                || $prevAdId == $widthToAd[$clientWidth]['ad_id']
-            ) {
-                if ($prevClientWidth !== -1) {
-                    unset($widthToAd[$prevClientWidth]);
-                }
-            }
-
-            $prevAdId = $widthToAd[$clientWidth]['ad_id'];
-            $prevClientWidth = $clientWidth;
-        }
 
         $displayCode = '';
-        foreach ($widthToAd as $clientWidth => $ad) {
-            if (!empty($displayCode)) {
-                $displayCode .= ' else ';
-            }
-
+        foreach ($adsByWidth as $adWidth => $ad) {
             $displayCodeOriginal = $this->_prepareAdHtml_gpt_getDisplayCode($ad, $slot);
             $displayCodeNoScript = str_replace('script', 'scr_ipt', $displayCodeOriginal);
 
-            $displayCode .= sprintf('if (clientWidth > %1$d) {'
-                . 'document.write(%2$s.replace(/scr_ipt/g, "script"));'
-                . '}', $clientWidth,
+            $displayCode .= sprintf('if (containerWidth > %1$d) {'
+                . '$container.append(%2$s.replace(/scr_ipt/g, "script"));'
+                . 'return;'
+                . '}', $adWidth,
                 json_encode($displayCodeNoScript));
         }
 
         return sprintf('<' . 'script>(function() {'
-            . 'var clientWidth = document.documentElement.clientWidth;'
-            . '%s})();</script>', $displayCode);
+            . 'setTimeout(function() {'
+            . 'var $container = jQuery(".slot-%1$d");'
+            . 'var containerWidth = $container.width();'
+            . '%2$s'
+            . '}, 100);'
+            . '})();</script>', $slot['slot_id'], $displayCode);
     }
 
     protected function _getSlotOptionsTemplate()
