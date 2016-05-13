@@ -85,13 +85,11 @@ class bdAd_Listener
         $routeMatch->getMajorSection();
         $majorSection = $routeMatch->getMajorSection();
 
-        $listValuesOption = XenForo_Application::getOptions('bdAd_customizeDisplayAd')->getOptions('bdAd_customizeDisplayAd');
-        $checkedValues = $listValuesOption['bdAd_customizeDisplayAd'];
+        $checkedValues = bdAd_Option::get('customizeDisplayAd');
 
         foreach ($checkedValues as $key => $value) {
             if ($majorSection == $key) {
                 self::$_noAd = false;
-                self::bdAd_customizeDisplayAdCheck();
             }
         }
 

@@ -581,7 +581,6 @@
     <option option_id="bdAd_customizeDisplayAd" edit_format="checkbox" data_type="array" can_backup="1">
       <default_value></default_value>
       <edit_format_params>account=account
-search=search
 members=members</edit_format_params>
       <sub_options>*</sub_options>
       <relation group_id="bdAd" display_order="1"/>
