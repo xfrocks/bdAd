@@ -4,7 +4,7 @@ class bdAd_Listener
 {
     public static $adHasBeenServed = false;
     public static $headerScripts = array();
-    protected static $_noAd = true;
+    protected static $_isNoAd = true;
 
     public static function load_class($class, array &$extend)
     {
@@ -41,8 +41,7 @@ class bdAd_Listener
         &$content,
         array &$containerData,
         XenForo_Template_Abstract $template
-    )
-    {
+    ) {
         if (!count(self::$headerScripts)) {
             return;
         }
@@ -85,19 +84,19 @@ class bdAd_Listener
         $routeMatch->getMajorSection();
         $majorSection = $routeMatch->getMajorSection();
 
-        $checkedValues = bdAd_Option::get('customizeDisplayAd');
+        $checkedValues = bdAd_Option::get('noAdPages');
 
         foreach ($checkedValues as $key => $value) {
             if ($majorSection == $key) {
-                self::$_noAd = false;
+                self::$_isNoAd = false;
             }
         }
 
     }
 
-    public static function bdAd_customizeDisplayAdCheck()
+    public static function isNoAd()
     {
-        return self::$_noAd;
+        return self::$_isNoAd;
     }
 
 }

@@ -83,7 +83,7 @@ class bdAd_Engine
             return false;
         }
 
-        if (bdAd_Listener::bdAd_customizeDisplayAdCheck() == false) {
+        if (bdAd_Listener::isNoAd() == false) {
             return false;
         }
 
