@@ -4,7 +4,7 @@ class bdAd_Listener
 {
     public static $adHasBeenServed = false;
     public static $headerScripts = array();
-    protected static $_isNoAd = true;
+    protected static $_isNoAd = false;
 
     public static function load_class($class, array &$extend)
     {
@@ -88,7 +88,7 @@ class bdAd_Listener
 
         foreach ($checkedValues as $key => $value) {
             if ($majorSection == $key) {
-                self::$_isNoAd = false;
+                self::$_isNoAd = true;
             }
         }
 
