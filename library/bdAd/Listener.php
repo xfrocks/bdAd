@@ -6,6 +6,7 @@ class bdAd_Listener
 
     public static $adHasBeenServed = false;
     public static $headerScripts = array();
+    public static $noAd = false;
 
     public static function load_class($class, array &$extend)
     {
@@ -78,5 +79,18 @@ class bdAd_Listener
         }
 
         return call_user_func_array($method, $args);
+    }
+
+    public static function front_controller_pre_dispatch(XenForo_FrontController $fc, XenForo_RouteMatch &$routeMatch)
+    {
+        $majorSection = $routeMatch->getMajorSection();
+
+        switch ($majorSection) {
+            case 'account':
+            case 'members':
+                if (bdAd_Option::get('noAdPages', $majorSection)) {
+                    self::$noAd = true;
+                }
+        }
     }
 }

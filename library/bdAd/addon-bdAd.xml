@@ -561,6 +561,7 @@
   <code_events/>
   <code_event_listeners>
     <listener event_id="file_health_check" execute_order="10" callback_class="bdAd_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
+    <listener event_id="front_controller_pre_dispatch" execute_order="10" callback_class="bdAd_Listener" callback_method="front_controller_pre_dispatch" active="1" hint="" description=""/>
     <listener event_id="init_dependencies" execute_order="10" callback_class="bdAd_Listener" callback_method="init_dependencies" active="1" hint="" description=""/>
     <listener event_id="load_class_controller" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
     <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
@@ -582,6 +583,13 @@
       <edit_format_params></edit_format_params>
       <sub_options></sub_options>
       <relation group_id="bdAd" display_order="1000"/>
+    </option>
+    <option option_id="bdAd_noAdPages" edit_format="checkbox" data_type="array" can_backup="1">
+      <default_value>a:1:{s:7:"account";s:1:"1";}</default_value>
+      <edit_format_params>account = {xen:phrase bdad_no_ad_pages_account}
+members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
+      <sub_options>*</sub_options>
+      <relation group_id="bdAd" display_order="500"/>
     </option>
   </optiongroups>
   <permissions>
@@ -628,6 +636,8 @@
     <phrase title="bdad_enable_slot" version_id="1" version_string="0.9-dev"><![CDATA[Enable Slot]]></phrase>
     <phrase title="bdad_hide_non_sidebar" version_id="1010000" version_string="1.1.0"><![CDATA[Hide For Non-Sidebar Browser]]></phrase>
     <phrase title="bdad_link" version_id="1" version_string="0.9-dev"><![CDATA[Link]]></phrase>
+    <phrase title="bdad_no_ad_pages_account" version_id="1020000" version_string="1.2.0"><![CDATA[Account Pages (/account/…)]]></phrase>
+    <phrase title="bdad_no_ad_pages_members" version_id="1020000" version_string="1.2.0"><![CDATA[Member Pages (/members/…)]]></phrase>
     <phrase title="bdad_please_upload_image_dimension_x_y" version_id="2" version_string="1.0.0"><![CDATA[Please upload a {width}x{height} image. You may upload a larger image but it must have the same width / height ratio.]]></phrase>
     <phrase title="bdad_please_upload_image_height_x" version_id="2" version_string="1.0.0"><![CDATA[Please upload an image with the minimum height of {height}px.]]></phrase>
     <phrase title="bdad_please_upload_image_width_x" version_id="2" version_string="1.0.0"><![CDATA[Please upload an image with the minimum width of {width}px.]]></phrase>
@@ -676,6 +686,8 @@
     <phrase title="cron_entry_bdAd_Log_runHourly" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement: Aggregate Logs Hourly]]></phrase>
     <phrase title="option_bdAd_gptStaticJs" version_id="1000100" version_string="1.0.1"><![CDATA[Static Js for Google Publisher Tag]]></phrase>
     <phrase title="option_bdAd_gptStaticJs_explain" version_id="1000100" version_string="1.0.1"><![CDATA[Enable this option to generate and use a static .js file for GPT configuration and bootstrap. By default, the system will generate this code on the fly and put it inside &lt;head /&gt; tag.]]></phrase>
+    <phrase title="option_bdAd_noAdPages" version_id="1020000" version_string="1.2.0"><![CDATA[Pages without ads]]></phrase>
+    <phrase title="option_bdAd_noAdPages_explain" version_id="1020000" version_string="1.2.0"><![CDATA[Select pages that you don't want to show any ads (regardless of positions).]]></phrase>
     <phrase title="option_group_bdAd" version_id="1000100" version_string="1.0.1"><![CDATA[[bd] Advertisement]]></phrase>
     <phrase title="option_group_bdAd_description" version_id="1000100" version_string="1.0.1"><![CDATA[]]></phrase>
     <phrase title="permission_general_bdAd_noAd" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement: Ad Free Access]]></phrase>

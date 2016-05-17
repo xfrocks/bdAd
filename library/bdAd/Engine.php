@@ -83,6 +83,10 @@ class bdAd_Engine
             return false;
         }
 
+        if (bdAd_Listener::$noAd) {
+            return false;
+        }
+
         $slotObj = bdAd_Slot_Abstract::create($slotClass);
         $args = func_get_args();
         array_shift($args);
