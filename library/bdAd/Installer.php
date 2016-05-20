@@ -136,7 +136,7 @@ class bdAd_Installer
 
         XenForo_Application::setSimpleCacheData(bdAd_Engine::SIMPLE_CACHE_ACTIVE_SLOT_CLASSES, false);
 
-        bdAd_ShippableHelper_Updater::onUninstall(bdAd_Listener::UPDATER_URL);
+        bdAd_ShippableHelper_Updater::onUninstall();
     }
 
 }
