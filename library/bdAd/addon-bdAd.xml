@@ -721,8 +721,12 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 .adWidget-image img { width: 100%; }
 .adWidget-gpt { overflow: hidden; width: 100%; }
 .adWidget-gpt > .adContainer { margin: 0 auto; }]]></template>
-    <template title="bdad_post" version_id="2" version_string="1.0.0"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Post,
-	post, $forum, $thread, $post}</xen:set>
+    <template title="bdad_post" version_id="1020101" version_string="1.2.1"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
+	method="getAdIdsShouldBeServed"
+	params="{xen:array 'position=post',
+		'forum={$forum}',
+		'thread={$thread}',
+		'post={$post}'}">bdAd_Slot_Post</xen:callback></xen:set>
 <xen:if is="{$adIds}">
 	<xen:require css="bdad.css" />
 
@@ -813,8 +817,11 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 </li>
 
 <xen:edithint template="search_result_thread" />]]></template>
-    <template title="bdad_thread_list_item" version_id="2" version_string="1.0.0"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Thread,
-	thread_list_item, $forum, $thread}</xen:set>
+    <template title="bdad_thread_list_item" version_id="1020101" version_string="1.2.1"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
+	method="getAdIdsShouldBeServed"
+	params="{xen:array 'position=thread_list_item',
+		'forum={$forum}',
+		'thread={$thread}'}">bdAd_Slot_Thread</xen:callback></xen:set>
 <xen:if is="{$adIds}">
 	<xen:require css="bdad.css" />
 
@@ -851,13 +858,16 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 </xen:if>
 
 <xen:edithint template="thread_list_item" />]]></template>
-    <template title="bdad_widget_slot" version_id="1000100" version_string="1.0.1"><![CDATA[<xen:set var="$adIds">{xen:helper bdAd_Engine, adIdsShouldBeServed, bdAd_Slot_Widget, $widget.options.slotId}</xen:set>
+    <template title="bdad_widget_slot" version_id="1020101" version_string="1.2.1"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
+	method="getAdIdsShouldBeServed"
+	params="{xen:array 'slotId={$widget.options.slotId}'}">bdAd_Slot_Widget</xen:callback></xen:set>
 <xen:if is="{$adIds}">
 	<xen:require css="bdad.css" />
 
 	<xen:if is="{$widget.options.slotOptions.adLayout} == 'gpt'">
-		<xen:set var="$gptStaticJs"><xen:callback class="bdAd_Option" method="get">gptStaticJs</xen:callback></xen:set>
-		<xen:if is="{$gptStaticJs}"><xen:require js="{xen:helper bdAd_Engine, gpt_getStaticJsUrl}" /></xen:if>
+		<xen:set var="$gptStaticJsUrl"><xen:callback class="bdAd_Engine"
+			method="getStaticJsUrlIfEnabled" /></xen:set>
+		<xen:if is="{$gptStaticJsUrl}"><xen:require js="{$gptStaticJsUrl}" /></xen:if>
 	</xen:if>
 
 	<xen:hook name="bdad_hook" params="{xen:array 'slotClass=bdAd_Slot_Widget', 'adIds={$adIds}'}">

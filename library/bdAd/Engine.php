@@ -77,7 +77,7 @@ class bdAd_Engine
         return in_array($slotClass, $activeSlotClasses, true);
     }
 
-    public static function adIdsShouldBeServed($slotClass)
+    public static function getAdIdsShouldBeServed($slotClass, array $params)
     {
         if (!self::isSlotClassActive($slotClass)) {
             return false;
@@ -88,10 +88,7 @@ class bdAd_Engine
         }
 
         $slotObj = bdAd_Slot_Abstract::create($slotClass);
-        $args = func_get_args();
-        array_shift($args);
-
-        return call_user_func_array(array($slotObj, 'adIdsShouldBeServed'), $args);
+        return call_user_func_array(array($slotObj, 'adIdsShouldBeServed'), $params);
     }
 
     public static function onTemplateHook($hookName, &$contents, array $hookParams)
@@ -187,8 +184,12 @@ class bdAd_Engine
         return $prefix . '/ads/gpt.js';
     }
 
-    public static function gpt_getStaticJsUrl()
+    public static function getStaticJsUrlIfEnabled()
     {
+        if (!bdAd_Option::get('gptStaticJs')) {
+            return '';
+        }
+
         return self::getInstance()->getGptStaticJsUrl();
     }
 

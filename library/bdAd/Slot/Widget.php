@@ -137,18 +137,8 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         return parent::verifyAdOptions($dw, $slot, $adOptions);
     }
 
-    public function adIdsShouldBeServed()
+    public function adIdsShouldBeServed($slotId)
     {
-        $args = func_get_args();
-        if (count($args) < 1) {
-            return 0;
-        }
-
-        $slotId = array_shift($args);
-        if (empty($slotId)) {
-            return 0;
-        }
-
         $engine = bdAd_Engine::getInstance();
         $slots = $engine->getSlotsByClass(__CLASS__);
         if (empty($slots)

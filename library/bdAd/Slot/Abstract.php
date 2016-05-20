@@ -60,8 +60,6 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
         return true;
     }
 
-    abstract public function adIdsShouldBeServed();
-
     final public function prepareAdHtml($adId, $htmlWithPlaceholders)
     {
         $engine = bdAd_Engine::getInstance();

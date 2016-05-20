@@ -38,14 +38,11 @@ class bdAd_Slot_Post extends bdAd_Slot_Abstract
         return parent::verifyAdOptions($dw, $slot, $adOptions);
     }
 
-    public function adIdsShouldBeServed()
+    public function adIdsShouldBeServed($position)
     {
         $args = func_get_args();
-        if (count($args) < 1) {
-            return 0;
-        }
+        array_shift($args);
 
-        $position = array_shift($args);
         $forum = null;
         $thread = null;
         $post = null;

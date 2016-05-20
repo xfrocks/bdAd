@@ -19,7 +19,10 @@ class bdAd_XenForo_ViewPublic_Search_Results extends XFCP_bdAd_XenForo_ViewPubli
             $i = 0;
             foreach ($this->_params['results'] as &$resultRef) {
                 foreach (array_keys($templateTitles) as $slotClass) {
-                    $adIds = bdAd_Engine::adIdsShouldBeServed($slotClass, '_search_result', $i);
+                    $adIds = bdAd_Engine::getAdIdsShouldBeServed($slotClass, array(
+                        'position' => '_search_result',
+                        'searchResultIndex' => $i,
+                    ));
                     if (!empty($adIds)) {
                         if (!isset($templates[$slotClass])) {
                             $templates[$slotClass] = $this->createTemplateObject($templateTitles[$slotClass]);

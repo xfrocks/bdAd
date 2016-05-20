@@ -29,11 +29,6 @@ class bdAd_Listener
 
     public static function init_dependencies(XenForo_Dependencies_Abstract $dependencies, array $data)
     {
-        XenForo_Template_Helper_Core::$helperCallbacks[strtolower('bdAd_Engine')] = array(
-            'bdAd_Listener',
-            'helperEngine',
-        );
-
         bdAd_ShippableHelper_Updater::onInitDependencies($dependencies, self::UPDATER_URL);
     }
 
