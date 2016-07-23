@@ -274,7 +274,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
             $displayCodeOriginal = $this->_prepareAdHtml_gpt_getDisplayCode($ad, $slot);
             $displayCodeNoScript = str_replace('script', 'scr_ipt', $displayCodeOriginal);
 
-            $displayCode .= sprintf('if (containerWidth > %1$d) {'
+            $displayCode .= sprintf('if (containerWidth >= %1$d) {'
                 . '$container.append(%2$s.replace(/scr_ipt/g, "script"));'
                 . 'return;'
                 . '}', $adWidth,
