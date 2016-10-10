@@ -233,22 +233,25 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
 
     protected function _prepareAdHtml_gpt_getDisplayCode(array $ad, array $slot)
     {
-        $divId = bdAd_Engine::gpt_getContainerElementId($ad);
         $style = '';
         if (!empty($ad['ad_options']['sizeWidth']) && !empty($ad['ad_options']['sizeHeight'])) {
-            $style = sprintf(' style="width: %dpx; height: %dpx;"',
+            $style = sprintf(' style="min-width: %dpx; min-height: %dpx;"',
                 $ad['ad_options']['sizeWidth'], $ad['ad_options']['sizeHeight']);
         }
 
+        $divId = bdAd_Engine::gpt_getContainerElementId($ad);
+        $defineSlotJs = '';
         if (!bdAd_Option::get('gptStaticJs')) {
             bdAd_Engine::gpt_generateBootstrapJs($ad, bdAd_Listener::$headerScripts);
+            $divId = sprintf('%s-%d', $divId, XenForo_Application::$time);
+            $defineSlotJs = bdAd_Engine::gpt_generateDefineSlotJs($ad, $divId);
         }
 
         bdAd_Engine::getInstance()->markServed($slot['slot_id'], $ad['ad_id']);
 
         return sprintf('<' . 'div id="%1$s" class="adContainer"%2$s>'
-            . '<script>googletag.cmd.push(function(){'
-            . 'googletag.display("%1$s");});</script></div>', $divId, $style);
+            . '<script>googletag.cmd.push(function(){%3$sgoogletag.display("%1$s");});</script></div>',
+            $divId, $style, $defineSlotJs);
     }
 
     protected function _prepareAdHtml_gpt_getHideNonSidebarDisplayCode(array $ad, array $slot)

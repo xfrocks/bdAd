@@ -145,13 +145,19 @@ class bdAd_Engine
         }
 
         $containerElementId = self::gpt_getContainerElementId($ad);
+        $scripts['gpt_5_' . $containerElementId] = self::gpt_generateDefineSlotJs($ad, $containerElementId);
+    }
+
+    public static function gpt_generateDefineSlotJs(array $ad, $containerElementId)
+    {
         $adSize = 'null';
         if (!empty($ad['ad_options']['sizeWidth'])
             && !empty($ad['ad_options']['sizeHeight'])
         ) {
             $adSize = sprintf('[%d, %d]', $ad['ad_options']['sizeWidth'], $ad['ad_options']['sizeHeight']);
         }
-        $scripts['gpt_5_' . $containerElementId] = sprintf('googletag.defineSlot(%1$s, %2$s, %3$s)'
+
+        return sprintf('googletag.defineSlot(%1$s, %2$s, %3$s)'
             . '.addService(googletag.pubads());',
             json_encode($ad['ad_options']['adUnitPath']),
             $adSize,
