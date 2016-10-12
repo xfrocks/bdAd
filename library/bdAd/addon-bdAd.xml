@@ -242,6 +242,13 @@
 	
 	<xen:textboxunit label="{xen:phrase html}:" name="ad_options[html]" value="{$ad.ad_options.html}"
 					 rows="5" inputclass="Elastic" />
+<xen:elseif is="{$slot.slot_options.adLayout} == 'adsense'" />
+	<xen:textboxunit label="{xen:phrase bdad_ad_adsense_publisher_id}:" name="ad_options[publisherId]" value="{$ad.ad_options.publisherId}"
+					 placeholder="pub-1234567890" />
+	<xen:textboxunit label="{xen:phrase bdad_ad_adsense_slot_id}:" name="ad_options[slotId]" value="{$ad.ad_options.slotId}"
+					 placeholder="1234567890" />
+	<xen:textboxunit label="{xen:phrase bdad_ad_format}:" name="ad_options[format]" value="{$ad.ad_options.format}"
+					 placeholder="auto" />
 <xen:elseif is="{$slot.slot_options.adLayout} == 'gpt'" />
 	<xen:textboxunit label="{xen:phrase bdad_ad_unit_path}:" name="ad_options[adUnitPath]" value="{$ad.ad_options.adUnitPath}"
 					 placeholder="/1234/targeted/ad/unit" />
@@ -534,6 +541,8 @@
 	</xen:option>
 	
 	<xen:option value="html">{xen:phrase bdad_ad_layout_html}</xen:option>
+	
+	<xen:option value="adsense">{xen:phrase bdad_ad_layout_adsense}</xen:option>
 
 	<xen:option value="gpt" label="{xen:phrase bdad_ad_layout_gpt}" inputclass="Hider">
 		<xen:disabled>
@@ -608,14 +617,18 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
     <phrase title="bdad_ads" version_id="1" version_string="0.9-dev"><![CDATA[Ads]]></phrase>
     <phrase title="bdad_ad_add" version_id="1" version_string="0.9-dev"><![CDATA[Add New Ad]]></phrase>
     <phrase title="bdad_ad_add_short" version_id="1" version_string="0.9-dev"><![CDATA[+Ad]]></phrase>
+    <phrase title="bdad_ad_adsense_publisher_id" version_id="1020200" version_string="1.2.2"><![CDATA[Publisher ID]]></phrase>
+    <phrase title="bdad_ad_adsense_slot_id" version_id="1020200" version_string="1.2.2"><![CDATA[Slot ID]]></phrase>
     <phrase title="bdad_ad_confirm_deletion" version_id="1" version_string="0.9-dev"><![CDATA[Confirm Deletion of Ad]]></phrase>
     <phrase title="bdad_ad_criteria_user_explain" version_id="1" version_string="0.9-dev"><![CDATA[Select user criteria to target this ad. If nothing is setup, it will target everyone. Please note that user who has the permission "Ad Free Access" won't see ads anyway.]]></phrase>
     <phrase title="bdad_ad_delete" version_id="1" version_string="0.9-dev"><![CDATA[Delete Ad]]></phrase>
     <phrase title="bdad_ad_description" version_id="1" version_string="0.9-dev"><![CDATA[Description]]></phrase>
     <phrase title="bdad_ad_edit" version_id="1" version_string="0.9-dev"><![CDATA[Edit Ad]]></phrase>
+    <phrase title="bdad_ad_format" version_id="1020200" version_string="1.2.2"><![CDATA[Format]]></phrase>
     <phrase title="bdad_ad_image" version_id="1" version_string="0.9-dev"><![CDATA[Ad Image]]></phrase>
     <phrase title="bdad_ad_is_active" version_id="1" version_string="0.9-dev"><![CDATA[Ad is active]]></phrase>
     <phrase title="bdad_ad_layout" version_id="1" version_string="0.9-dev"><![CDATA[Ad Layout]]></phrase>
+    <phrase title="bdad_ad_layout_adsense" version_id="1020200" version_string="1.2.2"><![CDATA[AdSense]]></phrase>
     <phrase title="bdad_ad_layout_gpt" version_id="1000100" version_string="1.0.1"><![CDATA[Google Publisher Tag]]></phrase>
     <phrase title="bdad_ad_layout_html" version_id="1" version_string="0.9-dev"><![CDATA[HTML]]></phrase>
     <phrase title="bdad_ad_layout_image" version_id="1" version_string="0.9-dev"><![CDATA[Image]]></phrase>
@@ -858,17 +871,11 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 </xen:if>
 
 <xen:edithint template="thread_list_item" />]]></template>
-    <template title="bdad_widget_slot" version_id="1020101" version_string="1.2.1"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
+    <template title="bdad_widget_slot" version_id="1020200" version_string="1.2.2"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
 	method="getAdIdsShouldBeServed"
 	params="{xen:array 'slotId={$widget.options.slotId}'}">bdAd_Slot_Widget</xen:callback></xen:set>
 <xen:if is="{$adIds}">
 	<xen:require css="bdad.css" />
-
-	<xen:if is="{$widget.options.slotOptions.adLayout} == 'gpt'">
-		<xen:set var="$gptStaticJsUrl"><xen:callback class="bdAd_Engine"
-			method="getStaticJsUrlIfEnabled" /></xen:set>
-		<xen:if is="{$gptStaticJsUrl}"><xen:require js="{$gptStaticJsUrl}" /></xen:if>
-	</xen:if>
 
 	<xen:hook name="bdad_hook" params="{xen:array 'slotClass=bdAd_Slot_Widget', 'adIds={$adIds}'}">
 		<div class="adWidget adWidget-{$widget.options.slotOptions.adLayout}{_adClass}"{_adAttributes}>
@@ -876,7 +883,13 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 				<a href="{link}" rel="nofollow"><img src="{imageUrl}" /></a>
 			<xen:elseif is="{$widget.options.slotOptions.adLayout} == 'html'"/>
 				{html}
+			<xen:elseif is="{$widget.options.slotOptions.adLayout} == 'adsense'"/>
+				<xen:require js="js/bdAd/loader.min.js" />
+				{adsbygoogle}
 			<xen:elseif is="{$widget.options.slotOptions.adLayout} == 'gpt'"/>
+				<xen:set var="$gptStaticJsUrl"><xen:callback class="bdAd_Engine"
+					method="getStaticJsUrlIfEnabled" /></xen:set>
+				<xen:if is="{$gptStaticJsUrl}"><xen:require js="{$gptStaticJsUrl}" /></xen:if>
 				{googletag.display}
 			<xen:else />
 				<h4><a href="{link}" rel="nofollow">{title}</a></h4>

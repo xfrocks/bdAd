@@ -2,6 +2,12 @@
 
 class bdAd_Slot_Widget extends bdAd_Slot_Abstract
 {
+    const AD_LAYOUT_TEXT = 'text';
+    const AD_LAYOUT_IMAGE = 'image';
+    const AD_LAYOUT_HTML = 'html';
+    const AD_LAYOUT_ADSENSE = 'adsense';
+    const AD_LAYOUT_GPT = 'gpt';
+
     public function verifySlotOptions(bdAd_DataWriter_Slot $dw, array $slotOptions)
     {
         if (empty($slotOptions['widgetId'])) {
@@ -9,7 +15,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         }
 
         switch ($slotOptions['adLayout']) {
-            case 'gpt':
+            case self::AD_LAYOUT_GPT:
                 if (!empty($slotOptions['responsiveAds'])
                     && !empty($slotOptions['hideNonSidebar'])
                 ) {
@@ -25,7 +31,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
     public function allowUpload(array $slot, $optionKey)
     {
         switch ($optionKey) {
-            case 'image':
+            case self::AD_LAYOUT_IMAGE:
                 if (!empty($slot['slot_options']['adLayout'])
                     && $slot['slot_options']['adLayout'] === 'image'
                 ) {
@@ -42,7 +48,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         $constraints = parent::getUploadConstraints($slot, $optionKey);
 
         switch ($optionKey) {
-            case 'image':
+            case self::AD_LAYOUT_IMAGE:
                 if (!empty($slot['slot_options']['adLayout'])
                     && $slot['slot_options']['adLayout'] === 'image'
                 ) {
@@ -62,7 +68,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
     public function assertUploadedFile(array $slot, $optionKey, XenForo_Upload $file)
     {
         switch ($optionKey) {
-            case 'image':
+            case self::AD_LAYOUT_IMAGE:
                 if (!empty($slot['slot_options']['adLayout'])
                     && $slot['slot_options']['adLayout'] === 'image'
                 ) {
@@ -109,12 +115,23 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
     public function verifyAdOptions(bdAd_DataWriter_Ad $dw, array $slot, array $adOptions)
     {
         switch ($slot['slot_options']['adLayout']) {
-            case 'image':
+            case self::AD_LAYOUT_IMAGE:
                 $this->_verifyAdOptions_helperLink($dw, $adOptions);
                 break;
-            case 'html':
+            case self::AD_LAYOUT_HTML:
                 break;
-            case 'gpt':
+            case self::AD_LAYOUT_ADSENSE:
+                if (empty($adOptions['publisherId'])) {
+                    $dw->error(new XenForo_Phrase('bdad_ad_options_error_option_x_required',
+                        array('option' => new XenForo_Phrase('bdad_ad_adsense_publisher_id'))), 'ad_options');
+                }
+
+                if (empty($adOptions['slotId'])) {
+                    $dw->error(new XenForo_Phrase('bdad_ad_options_error_option_x_required',
+                        array('option' => new XenForo_Phrase('bdad_ad_adsense_slot_id'))), 'ad_options');
+                }
+                break;
+            case self::AD_LAYOUT_GPT:
                 if (empty($adOptions['adUnitPath'])) {
                     $dw->error(new XenForo_Phrase('bdad_ad_options_error_option_x_required',
                         array('option' => new XenForo_Phrase('bdad_ad_unit_path'))), 'ad_options');
@@ -166,7 +183,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         );
 
         switch ($slot['slot_options']['adLayout']) {
-            case 'image':
+            case self::AD_LAYOUT_IMAGE:
                 // image url
                 $imageWidth = XenForo_Template_Helper_Core::styleProperty('sidebar.width')
                     - XenForo_Template_Helper_Core::styleProperty('secondaryContent.padding-left')
@@ -180,15 +197,26 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                 $mapping['{imageWidth}'] = $imageWidth;
                 $mapping['{imageHeight}'] = $imageHeight;
                 break;
-            case 'html':
+            case self::AD_LAYOUT_HTML:
                 $mapping['{html}'] = $ad['ad_options']['html'];
                 break;
-            case 'gpt':
+            case self::AD_LAYOUT_ADSENSE:
+                $mapping['{adsbygoogle}'] = $this->_prepareAdHtml_adsense_render($ad, $slot);
+                break;
+            case self::AD_LAYOUT_GPT:
                 $mapping['{googletag.display}'] = $this->_prepareAdHtml_gpt_render($ad, $slot);
                 break;
         }
 
         return str_replace(array_keys($mapping), array_values($mapping), $htmlWithPlaceholders);
+    }
+
+    protected function _prepareAdHtml_adsense_render(array $ad, array $slot)
+    {
+        return sprintf('<ins class="adsbygoogle AdSenseLoader" style="display: block;" '
+            . 'data-ad-client="%s" data-ad-slot="%s" data-ad-format="%s"></ins>',
+            $ad['ad_options']['publisherId'], $ad['ad_options']['slotId'],
+            !empty($ad['ad_options']['format']) ? $ad['ad_options']['format'] : 'auto');
     }
 
     protected function _prepareAdHtml_gpt_render(array $ad, array $slot)
