@@ -204,7 +204,39 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                 $mapping['{adsbygoogle}'] = $this->_prepareAdHtml_adsense_render($ad, $slot);
                 break;
             case self::AD_LAYOUT_GPT:
-                $mapping['{googletag.display}'] = $this->_prepareAdHtml_gpt_render($ad, $slot);
+                if (empty($slot['slot_options']['responsiveAds'])) {
+                    $gptRendered = $this->_prepareAdHtml_gpt_render($ad, $slot);
+                } else {
+                    // responsive ads: get all ads for this slot
+                    $engine = bdAd_Engine::getInstance();
+                    $ads = $engine->getAdsBySlotId($slot['slot_id']);
+                    $ads[$ad['ad_id']] = $ad;
+
+                    $adsByWidth = array();
+                    foreach ($ads as $_ad) {
+                        if (empty($_ad['ad_options']['sizeWidth'])) {
+                            continue;
+                        }
+                        $_sizeWidth = intval($_ad['ad_options']['sizeWidth']);
+                        if (isset($adsByWidth[$_sizeWidth])) {
+                            continue;
+                        }
+
+                        $adsByWidth[$_sizeWidth] = $_ad;
+                    }
+
+                    if (empty($adsByWidth)) {
+                        // no ads have width configured?!
+                        // render the randomly picked one
+                        $gptRendered = $this->_prepareAdHtml_gpt_render($ad, $slot);
+                    } elseif (count($adsByWidth) < 2) {
+                        // only one ad, render it directly
+                        $gptRendered = $this->_prepareAdHtml_gpt_render($ad, $slot);
+                    } else {
+                        $gptRendered = $this->_prepareAdHtml_gpt_renderAdSet($adsByWidth, $slot);
+                    }
+                }
+                $mapping['{googletag.display}'] = $gptRendered;
                 break;
         }
 
@@ -213,7 +245,8 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
 
     protected function _prepareAdHtml_adsense_render(array $ad, array $slot)
     {
-        return sprintf('<ins class="adsbygoogle AdSenseLoader" style="display: block;" '
+        return sprintf('<ins class="adsbygoogle AdSenseLoader" style="display:block;" '
+            . (XenForo_Application::debugMode() ? 'data-debug="yes"' : '')
             . 'data-ad-client="%s" data-ad-slot="%s" data-ad-format="%s"></ins>',
             $ad['ad_options']['publisherId'], $ad['ad_options']['slotId'],
             !empty($ad['ad_options']['format']) ? $ad['ad_options']['format'] : 'auto');
@@ -221,104 +254,25 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
 
     protected function _prepareAdHtml_gpt_render(array $ad, array $slot)
     {
-        if (!empty($slot['slot_options']['hideNonSidebar'])) {
-            return $this->_prepareAdHtml_gpt_getHideNonSidebarDisplayCode($ad, $slot);
-        }
-
-        if (empty($slot['slot_options']['responsiveAds'])) {
-            return $this->_prepareAdHtml_gpt_getDisplayCode($ad, $slot);
-        }
-
-        // responsive ads: get all ads for this slot
-        $engine = bdAd_Engine::getInstance();
-        $ads = $engine->getAdsBySlotId($slot['slot_id']);
-        $ads[$ad['ad_id']] = $ad;
-
-        $adsByWidth = array();
-        foreach ($ads as $_ad) {
-            if (empty($_ad['ad_options']['sizeWidth'])) {
-                continue;
-            }
-            $_sizeWidth = intval($_ad['ad_options']['sizeWidth']);
-            if (isset($adsByWidth[$_sizeWidth])) {
-                continue;
-            }
-
-            $adsByWidth[$_sizeWidth] = $_ad;
-        }
-
-        if (empty($adsByWidth)) {
-            // no ads have width configured?!
-            // render the randomly picked one
-            return $this->_prepareAdHtml_gpt_getDisplayCode($ad, $slot);
-        } elseif (count($adsByWidth) < 2) {
-            // only one ad, render it directly
-            return $this->_prepareAdHtml_gpt_getDisplayCode(reset($adsByWidth), $slot);
-        }
-
-        return $this->_prepareAdHtml_gpt_getResponsiveDisplayCode($adsByWidth, $slot);
+        return sprintf('<ins class="GptLoader" style="display:block;" '
+            . (XenForo_Application::debugMode() ? 'data-debug="yes"' : '')
+            . (!empty($slot['slot_options']['hideNonSidebar']) ? sprintf(' data-min-client-width="%d"',
+                XenForo_Template_Helper_Core::styleProperty('maxResponsiveWideWidth')) : '')
+            . 'data-ad-unit-path="%s" data-ad-size-width="%d" data-ad-size-height="%d"></ins>',
+            htmlentities($ad['ad_options']['adUnitPath']),
+            $ad['ad_options']['sizeWidth'], $ad['ad_options']['sizeHeight']);
     }
 
-    protected function _prepareAdHtml_gpt_getDisplayCode(array $ad, array $slot)
-    {
-        $style = '';
-        if (!empty($ad['ad_options']['sizeWidth']) && !empty($ad['ad_options']['sizeHeight'])) {
-            $style = sprintf(' style="min-width: %dpx; min-height: %dpx;"',
-                $ad['ad_options']['sizeWidth'], $ad['ad_options']['sizeHeight']);
-        }
-
-        $divId = bdAd_Engine::gpt_getContainerElementId($ad);
-        $defineSlotJs = '';
-        if (!bdAd_Option::get('gptStaticJs')) {
-            bdAd_Engine::gpt_generateBootstrapJs($ad, bdAd_Listener::$headerScripts);
-            $divId = sprintf('%s-%d', $divId, XenForo_Application::$time);
-            $defineSlotJs = bdAd_Engine::gpt_generateDefineSlotJs($ad, $divId);
-        }
-
-        bdAd_Engine::getInstance()->markServed($slot['slot_id'], $ad['ad_id']);
-
-        return sprintf('<' . 'div id="%1$s" class="adContainer"%2$s>'
-            . '<script>googletag.cmd.push(function(){%3$sgoogletag.display("%1$s");});</script></div>',
-            $divId, $style, $defineSlotJs);
-    }
-
-    protected function _prepareAdHtml_gpt_getHideNonSidebarDisplayCode(array $ad, array $slot)
-    {
-        $wideWidth = intval(XenForo_Template_Helper_Core::styleProperty('maxResponsiveWideWidth'));
-
-        $displayCodeOriginal = $this->_prepareAdHtml_gpt_getDisplayCode($ad, $slot);
-        $displayCodeNoScript = str_replace('script', 'scr_ipt', $displayCodeOriginal);
-
-        return sprintf('<' . 'script>(function() {'
-            . 'if (document.documentElement.clientWidth > %1$d) {'
-            . 'document.write(%2$s.replace(/scr_ipt/g, "script"));'
-            . '}'
-            . '})();</script>', $wideWidth, json_encode($displayCodeNoScript));
-    }
-
-    protected function _prepareAdHtml_gpt_getResponsiveDisplayCode(array $adsByWidth, array $slot)
+    protected function _prepareAdHtml_gpt_renderAdSet(array $adsByWidth, array $slot)
     {
         krsort($adsByWidth);
 
-        $displayCode = '';
+        $adsRendered = array();
         foreach ($adsByWidth as $adWidth => $ad) {
-            $displayCodeOriginal = $this->_prepareAdHtml_gpt_getDisplayCode($ad, $slot);
-            $displayCodeNoScript = str_replace('script', 'scr_ipt', $displayCodeOriginal);
-
-            $displayCode .= sprintf('if (containerWidth >= %1$d) {'
-                . '$container.append(%2$s.replace(/scr_ipt/g, "script"));'
-                . 'return;'
-                . '}', $adWidth,
-                json_encode($displayCodeNoScript));
+            $adsRendered[] = $this->_prepareAdHtml_gpt_render($ad, $slot);
         }
 
-        return sprintf('<' . 'script>(function() {'
-            . 'setTimeout(function() {'
-            . 'var $container = jQuery(".slot-%1$d");'
-            . 'var containerWidth = $container.width();'
-            . '%2$s'
-            . '}, 100);'
-            . '})();</script>', $slot['slot_id'], $displayCode);
+        return sprintf('<div class="ad-set">%s</div>', implode('', $adsRendered));
     }
 
     protected function _getSlotOptionsTemplate()

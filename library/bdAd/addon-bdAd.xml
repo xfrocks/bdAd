@@ -587,12 +587,6 @@
   <email_template_modifications/>
   <optiongroups>
     <group group_id="bdAd" display_order="9999" debug_only="0"/>
-    <option option_id="bdAd_gptStaticJs" edit_format="onoff" data_type="unsigned_integer" can_backup="1" validation_class="bdAd_Option" validation_method="verifyGptStaticJs">
-      <default_value>0</default_value>
-      <edit_format_params></edit_format_params>
-      <sub_options></sub_options>
-      <relation group_id="bdAd" display_order="1000"/>
-    </option>
     <option option_id="bdAd_noAdPages" edit_format="checkbox" data_type="array" can_backup="1">
       <default_value>a:1:{s:7:"account";s:1:"1";}</default_value>
       <edit_format_params>account = {xen:phrase bdad_no_ad_pages_account}
@@ -697,8 +691,6 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
     <phrase title="bdad_x_clicks" version_id="1" version_string="0.9-dev"><![CDATA[{count} clicks]]></phrase>
     <phrase title="bdad_x_views" version_id="1" version_string="0.9-dev"><![CDATA[{count} views]]></phrase>
     <phrase title="cron_entry_bdAd_Log_runHourly" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement: Aggregate Logs Hourly]]></phrase>
-    <phrase title="option_bdAd_gptStaticJs" version_id="1000100" version_string="1.0.1"><![CDATA[Static Js for Google Publisher Tag]]></phrase>
-    <phrase title="option_bdAd_gptStaticJs_explain" version_id="1000100" version_string="1.0.1"><![CDATA[Enable this option to generate and use a static .js file for GPT configuration and bootstrap. By default, the system will generate this code on the fly and put it inside &lt;head /&gt; tag.]]></phrase>
     <phrase title="option_bdAd_noAdPages" version_id="1020000" version_string="1.2.0"><![CDATA[Pages without ads]]></phrase>
     <phrase title="option_bdAd_noAdPages_explain" version_id="1020000" version_string="1.2.0"><![CDATA[Select pages that you don't want to show any ads (regardless of positions).]]></phrase>
     <phrase title="option_group_bdAd" version_id="1000100" version_string="1.0.1"><![CDATA[[bd] Advertisement]]></phrase>
@@ -887,9 +879,7 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 				<xen:require js="js/bdAd/loader.min.js" />
 				{adsbygoogle}
 			<xen:elseif is="{$widget.options.slotOptions.adLayout} == 'gpt'"/>
-				<xen:set var="$gptStaticJsUrl"><xen:callback class="bdAd_Engine"
-					method="getStaticJsUrlIfEnabled" /></xen:set>
-				<xen:if is="{$gptStaticJsUrl}"><xen:require js="{$gptStaticJsUrl}" /></xen:if>
+				<xen:require js="js/bdAd/loader.min.js" />
 				{googletag.display}
 			<xen:else />
 				<h4><a href="{link}" rel="nofollow">{title}</a></h4>

@@ -8,15 +8,4 @@ class bdAd_Option
 
         return $options->get('bdAd_' . $key, is_string($subKey) ? $subKey : null);
     }
-
-    public static function verifyGptStaticJs($enabled, XenForo_DataWriter $dw)
-    {
-        if ($enabled) {
-            /** @var bdAd_Model_Slot $slotModel */
-            $slotModel = $dw->getModelFromCache('bdAd_Model_Slot');
-            bdAd_Engine::refreshActiveAds($slotModel, array('gptStaticJs' => true));
-        }
-
-        return true;
-    }
 }
