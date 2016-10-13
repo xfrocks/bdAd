@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdAd" title="[bd] Advertisement" version_string="1.2.2" version_id="1020200" url="" install_callback_class="bdAd_Installer" install_callback_method="install" uninstall_callback_class="bdAd_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdAd" title="[bd] Advertisement" version_string="1.2.3" version_id="1020300" url="" install_callback_class="bdAd_Installer" install_callback_method="install" uninstall_callback_class="bdAd_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdAd" parent_navigation_id="setup" display_order="9999" link="ads" admin_permission_id="bdAd" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdAd_ads" parent_navigation_id="bdAd" display_order="1" link="ads" admin_permission_id="" debug_only="0" hide_no_children="0"/>
@@ -28,7 +28,7 @@
 
 	<input type="hidden" name="_xfConfirm" value="1" />
 </xen:form>]]></template>
-    <template title="bdad_ad_edit"><![CDATA[<xen:require js="js/bdAd/editor.js" />
+    <template title="bdad_ad_edit"><![CDATA[<xen:require js="js/bdAd/editor.min.js" />
 
 <xen:title>{xen:if '{$ad.ad_id}', '{xen:phrase bdad_ad_edit}', '{xen:phrase bdad_ad_add}'}</xen:title>
 
@@ -365,7 +365,7 @@
 
 	<input type="hidden" name="_xfConfirm" value="1" />
 </xen:form>]]></template>
-    <template title="bdad_slot_edit"><![CDATA[<xen:require js="js/bdAd/editor.js" />
+    <template title="bdad_slot_edit"><![CDATA[<xen:require js="js/bdAd/editor.min.js" />
 
 <xen:title>{xen:if '{$slot.slot_id}', '{xen:phrase bdad_slot_edit}', '{xen:phrase bdad_slot_add}'}</xen:title>
 
