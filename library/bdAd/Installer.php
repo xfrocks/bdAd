@@ -23,7 +23,6 @@ class bdAd_Installer
                 `ad_id` INT(10) UNSIGNED AUTO_INCREMENT
                 ,`ad_name` VARCHAR(50) NOT NULL
                 ,`user_id` INT(10) UNSIGNED NOT NULL
-                ,`slot_id` INT(10) UNSIGNED NOT NULL
                 ,`ad_options` MEDIUMBLOB NOT NULL
                 ,`active` TINYINT(4) UNSIGNED NOT NULL DEFAULT \'1\'
                 ,`attach_count` INT(10) UNSIGNED NOT NULL DEFAULT \'0\'
@@ -34,6 +33,16 @@ class bdAd_Installer
                 
             ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
             'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdad_ad`',
+        ),
+        'ad_slot' => array(
+            'createQuery' => 'CREATE TABLE IF NOT EXISTS `xf_bdad_ad_slot` (
+                `ad_id` INT(10) UNSIGNED NOT NULL
+                ,`slot_id` INT(10) UNSIGNED NOT NULL
+                ,`ad_slot_options` MEDIUMBLOB
+                , PRIMARY KEY (`ad_id`,`slot_id`)
+                
+            ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;',
+            'dropQuery' => 'DROP TABLE IF EXISTS `xf_bdad_ad_slot`',
         ),
     );
     protected static $_patches = array();
@@ -47,14 +56,16 @@ class bdAd_Installer
         }
 
         foreach (self::$_patches as $patch) {
-            $tableExisted = $db->fetchOne($patch['showTablesQuery']);
+            $tableExisted = $db->fetchOne($patch['tableCheckQuery']);
             if (empty($tableExisted)) {
                 continue;
             }
 
-            $existed = $db->fetchOne($patch['showColumnsQuery']);
+            $existed = $db->fetchOne($patch['checkQuery']);
             if (empty($existed)) {
-                $db->query($patch['alterTableAddColumnQuery']);
+                $db->query($patch['addQuery']);
+            } else {
+                $db->query($patch['modifyQuery']);
             }
         }
 
@@ -66,14 +77,14 @@ class bdAd_Installer
         $db = XenForo_Application::get('db');
 
         foreach (self::$_patches as $patch) {
-            $tableExisted = $db->fetchOne($patch['showTablesQuery']);
+            $tableExisted = $db->fetchOne($patch['tableCheckQuery']);
             if (empty($tableExisted)) {
                 continue;
             }
 
-            $existed = $db->fetchOne($patch['showColumnsQuery']);
+            $existed = $db->fetchOne($patch['checkQuery']);
             if (!empty($existed)) {
-                $db->query($patch['alterTableDropColumnQuery']);
+                $db->query($patch['dropQuery']);
             }
         }
 
@@ -114,6 +125,8 @@ class bdAd_Installer
         /** @var XenForo_Model_ContentType $contentTypeModel */
         $contentTypeModel = XenForo_Model::create('XenForo_Model_ContentType');
         $contentTypeModel->rebuildContentTypeCache();
+
+        self::_upgradeAdSlotIds();
     }
 
     public static function uninstallCustomized()
@@ -137,6 +150,25 @@ class bdAd_Installer
         XenForo_Application::setSimpleCacheData(bdAd_Engine::SIMPLE_CACHE_ACTIVE_SLOT_CLASSES, false);
 
         bdAd_ShippableHelper_Updater::onUninstall();
+    }
+
+    protected static function _upgradeAdSlotIds()
+    {
+        $db = XenForo_Application::getDb();
+
+        $slotIdColumnInAdTable = $db->fetchOne('SHOW COLUMNS FROM xf_bdad_ad LIKE \'slot_id\';');
+        if (empty($slotIdColumnInAdTable)) {
+            return;
+        }
+
+        $adSlots = $db->fetchAll('SELECT ad_id, slot_id FROM xf_bdad_ad');
+        foreach ($adSlots as $adSlot) {
+            $db->query('REPLACE INTO xf_bdad_ad_slot (ad_id, slot_id) VALUES (?, ?)',
+                array($adSlot['ad_id'], $adSlot['slot_id']));
+        }
+
+        $db->query('ALTER TABLE xf_bdad_ad CHANGE slot_id slot_id_'
+            . XenForo_Application::$time . ' INT(10) UNSIGNED');
     }
 
 }

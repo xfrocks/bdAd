@@ -4,8 +4,27 @@ class bdAd_DataWriter_Ad extends XenForo_DataWriter
 {
     const DATA_PHRASE_TITLE = 'phraseTitle';
     const DATA_PHRASE_DESCRIPTION = 'phraseDescription';
+    const DATA_SLOT_IDS = 'slotIds';
 
     const OPTION_REFRESH_ACTIVE_ADS = 'refreshActiveAds';
+    const OPTION_UPDATE_AD_SLOT_IDS = 'updateAdSlotIds';
+
+    public function setAdOptions(array $slotIds, $adOptionsSlotId, array $adOptions)
+    {
+        $this->setExtraData(self::DATA_SLOT_IDS, array());
+        $this->set('ad_options', array());
+        if (!in_array($adOptionsSlotId, $slotIds)) {
+            return false;
+        }
+
+        $adOptions['_time'] = XenForo_Application::$time;
+        $adOptions['_visitorUserId'] = XenForo_Visitor::getUserId();
+        $adOptions['_slotIds'] = $slotIds;
+        $adOptions['_adOptionsSlotId'] = $adOptionsSlotId;
+        $this->setExtraData(self::DATA_SLOT_IDS, $slotIds);
+        $this->set('ad_options', $adOptions);
+        return true;
+    }
 
     protected function _getFields()
     {
@@ -14,7 +33,6 @@ class bdAd_DataWriter_Ad extends XenForo_DataWriter
                 'ad_id' => array('type' => XenForo_DataWriter::TYPE_UINT, 'autoIncrement' => true),
                 'ad_name' => array('type' => XenForo_DataWriter::TYPE_STRING, 'required' => true, 'maxLength' => 50),
                 'user_id' => array('type' => XenForo_DataWriter::TYPE_UINT, 'required' => true),
-                'slot_id' => array('type' => XenForo_DataWriter::TYPE_UINT, 'required' => true),
                 'ad_options' => array(
                     'type' => XenForo_DataWriter::TYPE_SERIALIZED,
                     'required' => true,
@@ -38,6 +56,7 @@ class bdAd_DataWriter_Ad extends XenForo_DataWriter
         $options = parent::_getDefaultOptions();
 
         $options[self::OPTION_REFRESH_ACTIVE_ADS] = true;
+        $options[self::OPTION_UPDATE_AD_SLOT_IDS] = true;
 
         return $options;
     }
@@ -74,19 +93,8 @@ class bdAd_DataWriter_Ad extends XenForo_DataWriter
             $this->set('ad_name', strval(new XenForo_Phrase('bdad_ad_x', array('number' => $maxAdId + 1))));
         }
 
-        if ($this->isChanged('slot_id')
-            || $this->isChanged('ad_options')
-        ) {
-            $adOptions = unserialize($this->get('ad_options'));
-            $slot = $this->_getSlotModel()->getSlotById($this->get('slot_id'));
-            if (empty($slot)) {
-                $this->error(new XenForo_Phrase('bdad_slot_not_found'), 'slot_id');
-            } else {
-                $slotObj = bdAd_Slot_Abstract::create($slot['slot_class']);
-                if (!$slotObj->verifyAdOptions($this, $slot, $adOptions)) {
-                    $this->error(new XenForo_Phrase('bdad_ad_options_cannot_verified'), 'ad_options');
-                }
-            }
+        if ($this->isChanged('ad_options')) {
+            $this->_verifyAdOptions();
         }
     }
 
@@ -100,6 +108,11 @@ class bdAd_DataWriter_Ad extends XenForo_DataWriter
         $phraseDescription = $this->getExtraData(self::DATA_PHRASE_DESCRIPTION);
         if ($phraseDescription !== null) {
             $this->_insertOrUpdateMasterPhrase(bdAd_Model_Ad::getPhraseTitleForDescription($this->get('ad_id')), $phraseDescription);
+        }
+
+        if ($this->getOption(self::OPTION_UPDATE_AD_SLOT_IDS)) {
+            $this->_getAdModel()->updateAdSlotIds($this->get('ad_id'),
+                $this->getExtraData(self::DATA_SLOT_IDS));
         }
 
         if ($this->getOption(self::OPTION_REFRESH_ACTIVE_ADS)) {
@@ -121,8 +134,38 @@ class bdAd_DataWriter_Ad extends XenForo_DataWriter
             );
         }
 
+        if ($this->getOption(self::OPTION_UPDATE_AD_SLOT_IDS)) {
+            $this->_getAdModel()->updateAdSlotIds($this->getExisting('ad_id'), array());
+        }
+
         if ($this->getOption(self::OPTION_REFRESH_ACTIVE_ADS)) {
             bdAd_Engine::refreshActiveAds($this->_getSlotModel());
+        }
+    }
+
+    protected function _verifyAdOptions()
+    {
+        $adOptions = unserialize($this->get('ad_options'));
+        if (empty($adOptions)) {
+            return;
+        }
+
+        if (!isset($adOptions['_slotIds'])
+            || !isset($adOptions['_adOptionsSlotId'])
+        ) {
+            $this->error(new XenForo_Phrase('bdad_ad_options_cannot_verified'), 'ad_options');
+        }
+
+        foreach ($adOptions['_slotIds'] as $slotId) {
+            $slot = $this->_getSlotModel()->getSlotById($slotId);
+            if (empty($slot)) {
+                $this->error(new XenForo_Phrase('bdad_slot_not_found'), 'ad_options');
+            } else {
+                $slotObj = bdAd_Slot_Abstract::create($slot['slot_class']);
+                if (!$slotObj->verifyAdOptions($this, $slot, $adOptions)) {
+                    $this->error(new XenForo_Phrase('bdad_ad_options_cannot_verified'), 'ad_options');
+                }
+            }
         }
     }
 

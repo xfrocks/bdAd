@@ -2,7 +2,7 @@
 
 class bdAd_Engine
 {
-    const VERSION = 2016033001;
+    const VERSION = 2016112201;
     const DATA_REGISTRY_ACTIVE_ADS = 'bdAd_activeAds';
     const SIMPLE_CACHE_ACTIVE_SLOT_CLASSES = 'bdAd_activeSlotClasses';
 
@@ -12,7 +12,7 @@ class bdAd_Engine
 
         /** @var bdAd_Model_Ad $adModel */
         $adModel = $slotModel->getModelFromCache('bdAd_Model_Ad');
-        $ads = $adModel->getAds(array('active' => 1));
+        $ads = $adModel->getAds(array('active' => 1), array('join' => bdAd_Model_Ad::FETCH_AD_SLOTS));
         $ads = $adModel->prepareAdsUploadsForCaching($ads);
 
         $data = array(
@@ -20,28 +20,32 @@ class bdAd_Engine
             'slots' => array(),
             'adsGrouped' => array(),
         );
-        $gptAds = array();
+        $adSlotIdBase = count($ads) > 0 ? max(array_keys($ads)) : 0;
 
         $activeSlotClasses = array();
         foreach ($ads as $adId => $ad) {
-            if (!isset($slots[$ad['slot_id']])) {
+            if (empty($ad['adSlots'])) {
                 continue;
             }
-
             $ad = $adModel->prepareAdPhrasesForCaching($ad);
-            $slotRef =& $slots[$ad['slot_id']];
 
-            $data['slots'][$slotRef['slot_id']] = $slotRef;
-            $data['adsGrouped'][$slotRef['slot_id']][$adId] = $ad;
-            $activeSlotClasses[] = $slots[$ad['slot_id']]['slot_class'];
+            foreach ($ad['adSlots'] as $adAdSlot) {
+                $slotId = $adAdSlot['slot_id'];
+                if (!isset($slots[$slotId])) {
+                    continue;
+                }
 
-            if ($slotRef['slot_class'] == 'bdAd_Slot_Widget'
-                && !empty($slotRef['slot_options']['adLayout'])
-                && $slotRef['slot_options']['adLayout'] === 'gpt'
-            ) {
-                $gptAds[$adId] = $ad;
+                $slotRef =& $slots[$slotId];
+
+                $data['slots'][$slotId] = $slotRef;
+                $activeSlotClasses[] = $slotRef['slot_class'];
+
+                $adSlotId = ++$adSlotIdBase;
+                $data['adsGrouped'][$slotId][$adId] = $ad;
+                $data['adsGrouped'][$slotId][$adId]['adSlotId'] = $adSlotId;
+                unset($data['adsGrouped'][$slotId][$adId]['adSlots']);
+                $data['adsGrouped'][$slotId][$adId]['adSlotOptions'] = $adAdSlot['ad_slot_options'];
             }
-
         }
         $activeSlotClasses = array_unique($activeSlotClasses);
 
@@ -80,7 +84,13 @@ class bdAd_Engine
         }
 
         $slotObj = bdAd_Slot_Abstract::create($slotClass);
-        return call_user_func_array(array($slotObj, 'adIdsShouldBeServed'), $params);
+
+        $function = array($slotObj, 'adIdsShouldBeServed');
+        if (!is_callable($function)) {
+            return false;
+        }
+
+        return call_user_func_array($function, $params);
     }
 
     public static function onTemplateHook($hookName, &$contents, array $hookParams)
@@ -236,8 +246,11 @@ class bdAd_Engine
         }
 
         if (isset($this->_adsGrouped[$slotId][$adId])) {
-            $this->_servedAds[$adId] = $this->_adsGrouped[$slotId][$adId];
+            $ad = $this->_adsGrouped[$slotId][$adId];
             unset($this->_adsGrouped[$slotId][$adId]);
+
+            $adSlotId = $ad['adSlotId'];
+            $this->_servedAds[$adSlotId] = array($slotId, $ad);
 
             /** @var bdAd_Model_Log $logModel */
             $logModel = $this->_dataRegistryModel->getModelFromCache('bdAd_Model_Log');
@@ -250,19 +263,17 @@ class bdAd_Engine
         return false;
     }
 
-    public function getServedSlotAndAd($adId)
+    public function getServedSlotAndAd($adSlotId)
     {
         $slot = null;
         $ad = null;
 
-        if (isset($this->_servedAds[$adId])) {
-            $ad = $this->_servedAds[$adId];
-        }
+        if (isset($this->_servedAds[$adSlotId])) {
+            list($slotId, $ad) = $this->_servedAds[$adSlotId];
 
-        if (!empty($ad['slot_id'])
-            && isset($this->_servedSlots[$ad['slot_id']])
-        ) {
-            $slot = $this->_servedSlots[$ad['slot_id']];
+            if (isset($this->_servedSlots[$slotId])) {
+                $slot = $this->_servedSlots[$slotId];
+            }
         }
 
         return array($slot, $ad);

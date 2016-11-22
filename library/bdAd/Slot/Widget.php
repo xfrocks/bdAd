@@ -28,6 +28,15 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         return parent::verifySlotOptions($dw, $slotOptions);
     }
 
+    public function checkSlotsOptionsCompatibility(array $thisSlot, array $otherSlot)
+    {
+        if (!parent::checkSlotsOptionsCompatibility($thisSlot, $otherSlot)) {
+            return false;
+        }
+
+        return $thisSlot['slot_options']['adLayout'] === $otherSlot['slot_options']['adLayout'];
+    }
+
     public function allowUpload(array $slot, $optionKey)
     {
         switch ($optionKey) {
@@ -171,7 +180,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
 
         $engine->markServed($slotId, $ad['ad_id']);
 
-        return $ad['ad_id'];
+        return $ad['adSlotId'];
     }
 
     protected function _prepareAdHtml(array $ad, array $slot, $htmlWithPlaceholders)

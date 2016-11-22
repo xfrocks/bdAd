@@ -1,20 +1,18 @@
 /** @param {jQuery} $ jQuery Object */
 !function ($, window, document, _undefined) {
 
-    XenForo.bdAd_FormWithOptions = function ($form) {
-        this.__construct($form);
+    XenForo.bdAd_OptionsLoader = function ($input) {
+        this.__construct($input);
     };
 
-    XenForo.bdAd_FormWithOptions.prototype =
+    XenForo.bdAd_OptionsLoader.prototype =
     {
-        __construct: function ($form) {
-            this.$form = $form;
-            this.$select = $form.find($form.data('selectInputSelector'));
-            this.$options = $form.find(this.$select.data('optionsSelector'));
+        __construct: function ($input) {
+            this.$form = $input.parents('form');
+            this.$options = this.$form.find(this.$form.data('optionsSelector'));
+            this.optionsUrl = this.$form.data('optionsUrl');
 
-            this.optionsUrl = this.$select.data('optionsUrl');
-
-            this.$select.bind({
+            $input.bind({
                 keyup: $.context(this, 'fetchOptionsDelayed'),
                 change: $.context(this, 'fetchOptions')
             });
@@ -62,7 +60,7 @@
 
     // *********************************************************************
 
-    XenForo.register('form.SlotEdit, form.AdEdit', 'XenForo.bdAd_FormWithOptions');
+    XenForo.register('.bdAd_OptionsLoader', 'XenForo.bdAd_OptionsLoader');
 
 }
 (jQuery, this, document);

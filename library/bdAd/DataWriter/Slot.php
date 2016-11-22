@@ -136,15 +136,23 @@ class bdAd_DataWriter_Slot extends XenForo_DataWriter
     {
         /** @var bdAd_Model_Ad $adModel */
         $adModel = $this->getModelFromCache('bdAd_Model_Ad');
-        $ads = $adModel->getAds(array('slot_id' => $this->get('slot_id')));
+        $ads = $adModel->getAds(array('slot_id' => $this->get('slot_id')),
+            array('join' => bdAd_Model_Ad::FETCH_AD_SLOT | bdAd_Model_Ad::FETCH_AD_SLOTS));
 
         foreach ($ads as $ad) {
+            if (count($ad['adSlots']) > 1) {
+                continue;
+            }
+
             /** @var bdAd_DataWriter_Ad $adDw */
             $adDw = XenForo_DataWriter::create('bdAd_DataWriter_Ad');
             $adDw->setExistingData($ad, true);
+            $adDw->setOption(bdAd_DataWriter_Ad::OPTION_UPDATE_AD_SLOT_IDS, false);
             $adDw->setOption(bdAd_DataWriter_Ad::OPTION_REFRESH_ACTIVE_ADS, false);
             $adDw->delete();
         }
+
+        $adModel->deleteAdSlotForSlot($this->get('slot_id'));
     }
 
     protected function _SlotWidget_syncWidget()

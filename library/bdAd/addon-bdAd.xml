@@ -34,7 +34,9 @@
 
 <xen:form action="{xen:adminlink 'ads/save'}" class="AutoValidator AdEdit"
 		  data-redirect="yes"
-		  data-select-input-selector="#ctrl_slot_id">
+		  data-options-selector=".AdOptions"
+		  data-options-url="{xen:adminlink ads/options}"
+		  data-select-input-selector=".slot-ids-cb">
 
 	<xen:checkboxunit label="">
 		<xen:option name="active" value="1" selected="{$ad.active}">{xen:phrase bdad_ad_is_active}</xen:option>
@@ -58,14 +60,7 @@
 			<xen:textboxunit label="{xen:phrase bdad_ad_description}:" name="_phrases[description]" value="{$ad.phrases.description}"
 							 hint="{xen:phrase optional}" rows="5" />
 
-			<xen:selectunit label="{xen:phrase bdad_slot}:" name="slot_id" value="{$ad.slot_id}"
-							data-options-selector="#adOptions"
-							data-options-url="{xen:adminlink ads/options}">
-				<xen:options source="$listSlot" />
-			</xen:selectunit>
-			<div id="adOptions">
-				<xen:include template="bdad_ad_options" />
-			</div>
+			<xen:include template="bdad_ad_options" />
 		</li>
 		<li>
 			<xen:controlunit label="">
@@ -150,9 +145,7 @@
 	<xen:listitem
 		id="{$ad.ad_id}"
 		href="{xen:adminlink 'ads/edit', $ad}"
-		delete="{xen:adminlink 'ads/delete', $ad}"
-		toggle="{$ad.active}"
-		toggletitle="{xen:phrase enable_disable_x, 'title={$ad.ad_name}'}">
+		delete="{xen:adminlink 'ads/delete', $ad}">
 		<xen:label>{$ad.ad_name}</xen:label>
 		<xen:snippet>
 			{$ad.phrases.title}
@@ -186,15 +179,21 @@
 		</xen:popup>
 	</xen:listitem>
 </xen:foreach>]]></template>
-    <template title="bdad_ad_options"><![CDATA[<xen:if hascontent="true">
-	<fieldset>
-		<xen:contentcheck>
-			{xen:raw $adOptions}
-		</xen:contentcheck>
-	</fieldset>
-</xen:if>
+    <template title="bdad_ad_options"><![CDATA[<div class="AdOptions">
+	<xen:checkboxunit label="{xen:phrase bdad_slot}:" name="slot_ids" inputclass="bdAd_OptionsLoader">
+		<xen:options source="$slotIdsOptions" />
+	</xen:checkboxunit>
 
-<input type="hidden" name="ad_options_slot_id" value="{$ad.slot_id}" />]]></template>
+	<xen:if hascontent="true">
+		<fieldset>
+			<xen:contentcheck>
+				{xen:raw $adOptions}
+			</xen:contentcheck>
+		</fieldset>
+	</xen:if>
+
+	<input type="hidden" name="ad_options_slot_id" value="{$slot.slot_id}" />
+</div>]]></template>
     <template title="bdad_ad_options_post"><![CDATA[<div class="baseHtml">
 	<ul>
 		<xen:include template="bdad_ad_options__slot_options_forumIds" />
@@ -371,6 +370,8 @@
 
 <xen:form action="{xen:adminlink 'ad-slots/save'}" class="AutoValidator SlotEdit"
 		  data-redirect="yes"
+		  data-options-selector="#slotOptions"
+		  data-options-url="{xen:adminlink ad-slots/options}"
 		  data-select-input-selector="#ctrl_slot_class">
 
 	<xen:checkboxunit label="">
@@ -384,9 +385,9 @@
 						'{xen:phrase bdad_slot_add}: <em>%s</em>'}" />
 
 	<xen:if is="!{$slotClassNotListed}">
-		<xen:selectunit label="{xen:phrase bdad_slot_class}:" name="slot_class" value="{$slot.slot_class}"
-						data-options-selector="#slotOptions"
-						data-options-url="{xen:adminlink ad-slots/options}">
+		<xen:selectunit label="{xen:phrase bdad_slot_class}:"
+						name="slot_class" value="{$slot.slot_class}"
+						inputclass="bdAd_OptionsLoader">
 			<xen:options source="$slotClasses" />
 		</xen:selectunit>
 	<xen:else />

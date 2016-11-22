@@ -5,7 +5,7 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
     public function actionIndex()
     {
         $conditions = array();
-        $fetchOptions = array();
+        $fetchOptions = array('join' => bdAd_Model_Ad::FETCH_AD_SLOTS);
 
         $adModel = $this->_getAdModel();
         $ads = $adModel->getAds($conditions, $fetchOptions);
@@ -21,24 +21,16 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
     public function actionAdd()
     {
         $slotId = $this->_input->filterSingle('slot_id', XenForo_Input::UINT);
-
-        if ($slotId == 0) {
-            $slotIds = array_keys($this->_getSlotModel()->getList());
-            if (empty($slotIds)) {
-                return $this->responseRedirect(
-                    XenForo_ControllerResponse_Redirect::SUCCESS,
-                    XenForo_Link::buildAdminLink('ad-slots/add')
-                );
-            }
-            $slotId = reset($slotIds);
+        $slotIds = array();
+        if ($slotId > 0) {
+            $slotIds[] = $slotId;
         }
 
         $ad = array(
-            'slot_id' => $slotId,
             'active' => 1,
         );
 
-        return $this->_actionAddOrEdit($ad);
+        return $this->_actionAddOrEdit($slotIds, $ad);
     }
 
     public function actionEdit()
@@ -46,7 +38,7 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
         $id = $this->_input->filterSingle('ad_id', XenForo_Input::UINT);
         $ad = $this->_getAdOrError($id);
 
-        return $this->_actionAddOrEdit($ad);
+        return $this->_actionAddOrEdit(array(), $ad);
     }
 
     public function actionOptions()
@@ -60,14 +52,10 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
             $ad = array();
         }
 
-        $adInput = $this->_input->filter(array(
-            'slot_id' => XenForo_Input::UINT,
-            'ad_options' => XenForo_Input::ARRAY_SIMPLE,
-        ));
+        $slotIds = $this->_input->filterSingle('slot_ids', XenForo_Input::UINT, array('array' => true));
+        $ad['ad_options'] = $this->_input->filterSingle('ad_options', XenForo_Input::ARRAY_SIMPLE);
 
-        $adMerged = array_merge($ad, $adInput);
-
-        $response = $this->_actionAddOrEdit($adMerged);
+        $response = $this->_actionAddOrEdit($slotIds, $ad);
         $response->templateName = 'bdad_ad_options';
 
         return $response;
@@ -78,6 +66,8 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
         $this->_assertPostOnly();
 
         $id = $this->_input->filterSingle('ad_id', XenForo_Input::UINT);
+
+        /** @var bdAd_DataWriter_Ad $dw */
         $dw = XenForo_DataWriter::create('bdAd_DataWriter_Ad');
         if ($id) {
             $dw->setExistingData($id);
@@ -97,19 +87,17 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
         // get regular fields from input data
         $dwInput = $this->_input->filter(array(
             'ad_name' => XenForo_Input::STRING,
-            'slot_id' => XenForo_Input::UINT,
             'active' => XenForo_Input::BOOLEAN,
         ));
         $dw->bulkSet($dwInput);
 
         // get options (only if the correct ones have been rendered)
         $optionsInput = $this->_input->filter(array(
+            'slot_ids' => array(XenForo_Input::UINT, 'array' => true),
             'ad_options_slot_id' => XenForo_Input::UINT,
             'ad_options' => XenForo_Input::ARRAY_SIMPLE,
         ));
-        if ($optionsInput['ad_options_slot_id'] == $dw->get('slot_id')) {
-            $dw->set('ad_options', $optionsInput['ad_options']);
-        }
+        $dw->setAdOptions($optionsInput['slot_ids'], $optionsInput['ad_options_slot_id'], $optionsInput['ad_options']);
 
         // get configuration options
         $configOptions = $this->_input->filter(array(
@@ -134,7 +122,6 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
         $redirectUpload = $this->_input->filterSingle('redirect_upload', XenForo_Input::STRING);
         if (!empty($redirectUpload)) {
             $redirectTarget = XenForo_Link::buildAdminLink('ads/upload', $dw->getMergedData(), array(
-                'slot_id' => $dw->get('slot_id'),
                 'option_key' => $redirectUpload,
             ));
         }
@@ -168,15 +155,6 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
         }
     }
 
-    public function actionToggle()
-    {
-        return $this->_getToggleResponse(
-            $this->_getAdModel()->getAds(),
-            'bdAd_DataWriter_Ad',
-            'ads'
-        );
-    }
-
     public function actionEnable()
     {
         // can be requested over GET, so check for the token manually
@@ -200,7 +178,8 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
         $id = $this->_input->filterSingle('ad_id', XenForo_Input::UINT);
         $ad = $this->_getAdOrError($id);
 
-        $slotId = $this->_input->filterSingle('slot_id', XenForo_Input::UINT);
+        $slotIds = array_keys($ad['adSlots']);
+        $slotId = reset($slotIds);
         $slot = $this->_getSlotModel()->getSlotById($slotId);
         if (empty($slot)) {
             return $this->responseNoPermission();
@@ -280,6 +259,11 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
 
     protected function _getAdOrError($id, array $fetchOptions = array())
     {
+        if (!isset($fetchOptions['join'])) {
+            $fetchOptions['join'] = 0;
+        }
+        $fetchOptions['join'] |= bdAd_Model_Ad::FETCH_AD_SLOTS;
+
         $ad = $this->_getAdModel()->getAdById($id, $fetchOptions);
 
         if (empty($ad)) {
@@ -289,8 +273,15 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
         return $ad;
     }
 
-    protected function _actionAddOrEdit(array $ad)
+    protected function _actionAddOrEdit(array $slotIds, array $ad)
     {
+        if (count($slotIds) < 1
+            && isset($ad['adSlots'])
+            && is_array($ad['adSlots'])
+        ) {
+            $slotIds = array_keys($ad['adSlots']);
+        }
+
         $ad = $this->_getAdModel()->prepareAdUploads($ad);
 
         $adUserCriteria = array();
@@ -306,42 +297,34 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
 
         $slots = $this->_getSlotModel()->getSlots();
 
-        if (isset($ad['slot_id'])) {
-            foreach ($slots as $slot) {
-                if ($slot['slot_id'] == $ad['slot_id']) {
-                    $viewParams['slot'] = $slot;
-                    $viewParams['slotObj'] = bdAd_Slot_Abstract::create($slot['slot_class'], false);
+        $viewParams['slot'] = null;
+        foreach ($slots as $slot) {
+            if (in_array($slot['slot_id'], $slotIds)) {
+                $viewParams['slot'] = $slot;
+                $viewParams['slotObj'] = bdAd_Slot_Abstract::create($slot['slot_class'], false);
+                break;
+            }
+        }
+
+        $slotIdsOptions = array();
+        foreach ($slots as $slot) {
+            if (!empty($viewParams['slotObj'])) {
+                /** @var bdAd_Slot_Abstract $slotObj */
+                $slotObj = $viewParams['slotObj'];
+                if (!$slotObj->checkSlotsOptionsCompatibility($viewParams['slot'], $slot)) {
+                    continue;
                 }
             }
-        }
 
-        $slotClasses = $this->_getSlotModel()->getSlotClassTitles();
-        $listSlot = array();
-        foreach ($slotClasses as $slotClass => $slotClassTitle) {
-            $optGroup = sprintf('[%s]', $slotClassTitle);
+            $slotIdsOption = array(
+                'value' => $slot['slot_id'],
+                'label' => $slot['slot_name'],
+                'selected' => in_array($slot['slot_id'], $slotIds),
+            );
 
-            foreach (array_keys($slots) as $slotId) {
-                if ($slots[$slotId]['slot_class'] === $slotClass) {
-                    if (!isset($listSlot[$optGroup])) {
-                        $listSlot[$optGroup] = array();
-                    }
-
-                    $listSlot[$optGroup][$slotId] = $slots[$slotId]['slot_name'];
-                    unset($slots[$slotId]);
-                }
-            }
+            $slotIdsOptions[] = $slotIdsOption;
         }
-        if (!empty($slots)) {
-            $listSlotNew = array();
-            foreach ($slots as $slotId => $slot) {
-                $listSlotNew[$slotId] = $slot['slot_name'];
-            }
-            foreach ($listSlot as $key => $value) {
-                $listSlotNew[$key] = $value;
-            }
-            $listSlot = $listSlotNew;
-        }
-        $viewParams['listSlot'] = $listSlot;
+        $viewParams['slotIdsOptions'] = $slotIdsOptions;
 
         return $this->responseView('bdAd_ViewAdmin_Ad_Edit', 'bdad_ad_edit', $viewParams);
     }

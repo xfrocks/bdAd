@@ -32,6 +32,11 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
         ));
     }
 
+    public function checkSlotsOptionsCompatibility(array $thisSlot, array $otherSlot)
+    {
+        return $thisSlot['slot_class'] === $otherSlot['slot_class'];
+    }
+
     public function allowUpload(array $slot, $optionKey)
     {
         return false;

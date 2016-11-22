@@ -2,6 +2,9 @@
 
 class bdAd_Model_Ad extends XenForo_Model
 {
+    const FETCH_AD_SLOTS = 0x01;
+    const FETCH_AD_SLOT = 0x02;
+
     public function prepareAdPhrasesForCaching(array $ad)
     {
         /** @var XenForo_Model_Phrase $phraseModel */
@@ -96,6 +99,25 @@ class bdAd_Model_Ad extends XenForo_Model
         return $ads;
     }
 
+    public function updateAdSlotIds($adId, array $slotIds)
+    {
+        $this->_getDb()->query('DELETE FROM xf_bdad_ad_slot WHERE ad_id = ?', $adId);
+
+        $values = array();
+        foreach ($slotIds as $slotId) {
+            $values[] = sprintf('(%d, %d)', $adId, $slotId);
+        }
+        if (count($values) > 0) {
+            $this->_getDb()->query('REPLACE INTO xf_bdad_ad_slot (ad_id, slot_id) VALUES '
+                . implode(', ', $values));
+        }
+    }
+
+    public function deleteAdSlotForSlot($slotId)
+    {
+        $this->_getDb()->query('DELETE FROM xf_bdad_ad_slot WHERE slot_id = ?', $slotId);
+    }
+
     /* Start auto-generated lines of code. Change made will be overwriten... */
 
     public function getList(array $conditions = array(), array $fetchOptions = array())
@@ -158,9 +180,13 @@ class bdAd_Model_Ad extends XenForo_Model
         // parse all the options fields
         foreach ($ads as &$ad) {
             $ad['ad_options'] = @unserialize($ad['ad_options']);
-            if (empty($ad['ad_options'])) $ad['ad_options'] = array();
+            if (empty($ad['ad_options'])) {
+                $ad['ad_options'] = array();
+            }
             $ad['ad_config_options'] = @unserialize($ad['ad_config_options']);
-            if (empty($ad['ad_config_options'])) $ad['ad_config_options'] = array();
+            if (empty($ad['ad_config_options'])) {
+                $ad['ad_config_options'] = array();
+            }
         }
 
         $this->_getAdsCustomized($ads, $fetchOptions);
@@ -219,17 +245,6 @@ class bdAd_Model_Ad extends XenForo_Model
                 }
             } else {
                 $sqlConditions[] = "ad.user_id = " . $db->quote($conditions['user_id']);
-            }
-        }
-
-        if (isset($conditions['slot_id'])) {
-            if (is_array($conditions['slot_id'])) {
-                if (!empty($conditions['slot_id'])) {
-                    // only use IN condition if the array is not empty (nasty!)
-                    $sqlConditions[] = "ad.slot_id IN (" . $db->quote($conditions['slot_id']) . ")";
-                }
-            } else {
-                $sqlConditions[] = "ad.slot_id = " . $db->quote($conditions['slot_id']);
             }
         }
 
@@ -318,17 +333,55 @@ class bdAd_Model_Ad extends XenForo_Model
 
     protected function _getAdsCustomized(array &$data, array $fetchOptions)
     {
-        // customized code goes here
+        if (isset($fetchOptions['join'])) {
+            if ($fetchOptions['join'] & self::FETCH_AD_SLOTS && count($data) > 0) {
+                $adSlots = $this->_getDb()->fetchAll('
+                    SELECT *
+                    FROM xf_bdad_ad_slot
+                    WHERE ad_id IN (' . $this->_getDb()->quote(array_keys($data)) . ')
+                ');
+
+                foreach ($data as &$adRef) {
+                    $adRef['adSlots'] = array();
+                    foreach ($adSlots as $adSlot) {
+                        if ($adSlot['ad_id'] == $adRef['ad_id']) {
+                            $adSlot['ad_slot_options'] = @unserialize($adSlot['ad_slot_options']);
+                            if (empty($adSlot['ad_slot_options'])) {
+                                $adSlot['ad_slot_options'] = array();
+                            }
+                            $adRef['adSlots'][$adSlot['slot_id']] = $adSlot;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     protected function _prepareAdConditionsCustomized(array &$sqlConditions, array $conditions, array $fetchOptions)
     {
-        // customized code goes here
+        if (isset($conditions['slot_id'])) {
+            if (is_array($conditions['slot_id'])) {
+                if (!empty($conditions['slot_id'])) {
+                    // only use IN condition if the array is not empty (nasty!)
+                    $sqlConditions[] = "ad_slot.slot_id IN (" . $this->_getDb()->quote($conditions['slot_id']) . ")";
+                }
+            } else {
+                $sqlConditions[] = "ad_slot.slot_id = " . $this->_getDb()->quote($conditions['slot_id']);
+            }
+        }
     }
 
     protected function _prepareAdFetchOptionsCustomized(&$selectFields, &$joinTables, array $fetchOptions)
     {
-        // customized code goes here
+        if (isset($fetchOptions['join'])) {
+            if ($fetchOptions['join'] & self::FETCH_AD_SLOT) {
+                $selectFields .= ',
+                    ad_slot.*';
+                $joinTables .= '
+                    INNER JOIN `xf_bdad_ad_slot` AS ad_slot
+                    ON (ad_slot.ad_id = ad.ad_id)';
+            }
+        }
     }
 
     protected function _prepareAdOrderOptionsCustomized(array &$choices, array &$fetchOptions)
