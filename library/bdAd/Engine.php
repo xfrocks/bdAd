@@ -251,10 +251,6 @@ class bdAd_Engine
 
             $adSlotId = $ad['adSlotId'];
             $this->_servedAds[$adSlotId] = array($slotId, $ad);
-
-            /** @var bdAd_Model_Log $logModel */
-            $logModel = $this->_dataRegistryModel->getModelFromCache('bdAd_Model_Log');
-            $logModel->logAdView($adId);
         }
 
         $this->_updateActiveSlotClasses();

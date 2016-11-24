@@ -135,9 +135,7 @@ class bdAd_Slot_Post extends bdAd_Slot_Abstract
             return 0;
         }
 
-        $engine->markServed($slot['slot_id'], $ad['ad_id']);
-
-        return $ad['adSlotIds'];
+        return $this->_adIdsShouldBeServed_helperMarkServed($slot['slot_id'], $ad);
     }
 
     protected function _prepareAdHtml(array $ad, array $slot, $htmlWithPlaceholders)

@@ -178,9 +178,20 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
             return 0;
         }
 
-        $engine->markServed($slotId, $ad['ad_id']);
+        return $this->_adIdsShouldBeServed_helperMarkServed($slotId, $ad);
+    }
 
-        return $ad['adSlotId'];
+    protected function _adIdsShouldBeServed_helperLogAdView(array $ad)
+    {
+        if (!empty($ad['ad_options']['publisherId'])) {
+            // adsense, bypass logging
+            return;
+        } elseif (!empty($ad['ad_options']['adUnitPath'])) {
+            // gpt ad, bypass logging
+            return;
+        }
+
+        parent::_adIdsShouldBeServed_helperLogAdView($ad);
     }
 
     protected function _prepareAdHtml(array $ad, array $slot, $htmlWithPlaceholders)

@@ -191,6 +191,34 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
         return in_array($forum['node_id'], $forumIds);
     }
 
+    protected function _adIdsShouldBeServed_helperMarkServed($slotId, array $ad)
+    {
+        $ads = func_get_args();
+        array_shift($ads);
+
+        $engine = bdAd_Engine::getInstance();
+        $adSlotIds = array();
+        foreach ($ads as $ad) {
+            $engine->markServed($slotId, $ad['ad_id']);
+            $this->_adIdsShouldBeServed_helperLogAdView($ad);
+
+            $adSlotIds[] = $ad['adSlotId'];
+        }
+
+        if (count($adSlotIds) > 0) {
+            return implode(',', $adSlotIds);
+        } else {
+            return 0;
+        }
+    }
+
+    protected function _adIdsShouldBeServed_helperLogAdView(array $ad)
+    {
+        /** @var bdAd_Model_Log $logModel */
+        $logModel = $this->getModelFromCache('bdAd_Model_Log');
+        $logModel->logAdView($ad['ad_id']);
+    }
+
     abstract protected function _prepareAdHtml(array $ad, array $slot, $htmlWithPlaceholders);
 
     protected function _prepareAdHtml_helperAdPhrase(array $ad, $type)
