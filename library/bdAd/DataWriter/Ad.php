@@ -110,9 +110,11 @@ class bdAd_DataWriter_Ad extends XenForo_DataWriter
             $this->_insertOrUpdateMasterPhrase(bdAd_Model_Ad::getPhraseTitleForDescription($this->get('ad_id')), $phraseDescription);
         }
 
-        if ($this->getOption(self::OPTION_UPDATE_AD_SLOT_IDS)) {
-            $this->_getAdModel()->updateAdSlotIds($this->get('ad_id'),
-                $this->getExtraData(self::DATA_SLOT_IDS));
+        $slotIds = $this->getExtraData(self::DATA_SLOT_IDS);
+        if (is_array($slotIds)
+            && $this->getOption(self::OPTION_UPDATE_AD_SLOT_IDS)
+        ) {
+            $this->_getAdModel()->updateAdSlotIds($this->get('ad_id'), $slotIds);
         }
 
         if ($this->getOption(self::OPTION_REFRESH_ACTIVE_ADS)) {
