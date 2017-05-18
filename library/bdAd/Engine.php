@@ -6,7 +6,7 @@ class bdAd_Engine
     const DATA_REGISTRY_ACTIVE_ADS = 'bdAd_activeAds';
     const SIMPLE_CACHE_ACTIVE_SLOT_CLASSES = 'bdAd_activeSlotClasses';
 
-    public static function refreshActiveAds(bdAd_Model_Slot $slotModel, array $options = array())
+    public static function refreshActiveAds(bdAd_Model_Slot $slotModel)
     {
         $slots = $slotModel->getSlots(array('active' => 1));
 

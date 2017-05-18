@@ -15,8 +15,15 @@ class bdAd_Route_PrefixAdmin_Slot implements XenForo_Route_Interface
         return $router->getRouteMatch('bdAd_ControllerAdmin_Slot', $action, 'bdAd');
     }
 
-    public function buildLink($originalPrefix, $outputPrefix, $action, $extension, $data, array &$extraParams)
-    {
+    public function buildLink(
+        /** @noinspection PhpUnusedParameterInspection */
+        $originalPrefix,
+        $outputPrefix,
+        $action,
+        $extension,
+        $data,
+        array &$extraParams
+    ) {
         if (is_array($data)) {
             return XenForo_Link::buildBasicLinkWithIntegerParam($outputPrefix, $action, $extension, $data, 'slot_id');
         } else {

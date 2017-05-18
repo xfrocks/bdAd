@@ -15,8 +15,15 @@ class bdAd_Route_PrefixAdmin_Ad implements XenForo_Route_Interface
         return $router->getRouteMatch('bdAd_ControllerAdmin_Ad', $action, 'bdAd');
     }
 
-    public function buildLink($originalPrefix, $outputPrefix, $action, $extension, $data, array &$extraParams)
-    {
+    public function buildLink(
+        /** @noinspection PhpUnusedParameterInspection */
+        $originalPrefix,
+        $outputPrefix,
+        $action,
+        $extension,
+        $data,
+        array &$extraParams
+    ) {
         if (is_array($data)) {
             return XenForo_Link::buildBasicLinkWithIntegerParam($outputPrefix, $action, $extension, $data, 'ad_id');
         } else {

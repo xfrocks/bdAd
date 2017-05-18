@@ -97,10 +97,7 @@ class bdAd_Model_Slot extends XenForo_Model
     public function countSlots(array $conditions = array(), array $fetchOptions = array())
     {
         $whereConditions = $this->prepareSlotConditions($conditions, $fetchOptions);
-
-        $orderClause = $this->prepareSlotOrderOptions($fetchOptions);
         $joinOptions = $this->prepareSlotFetchOptions($fetchOptions);
-        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
         return $this->_getDb()->fetchOne("
             SELECT COUNT(*)

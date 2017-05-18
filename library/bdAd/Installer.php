@@ -97,8 +97,11 @@ class bdAd_Installer
 
     /* End auto-generated lines of code. Feel free to make changes below */
 
-    public static function installCustomized($existingAddOn, $addOnData)
-    {
+    public static function installCustomized(
+        /** @noinspection PhpUnusedParameterInspection */
+        $existingAddOn,
+        $addOnData
+    ) {
         if (XenForo_Application::$versionId < 1020000) {
             throw new XenForo_Exception('[bd] Advertisement requires XenForo 1.2.0+');
         }

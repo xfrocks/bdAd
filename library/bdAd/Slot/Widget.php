@@ -263,8 +263,11 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         return str_replace(array_keys($mapping), array_values($mapping), $htmlWithPlaceholders);
     }
 
-    protected function _prepareAdHtml_adsense_render(array $ad, array $slot)
-    {
+    protected function _prepareAdHtml_adsense_render(
+        array $ad,
+        /** @noinspection PhpUnusedParameterInspection */
+        array $slot
+    ) {
         return sprintf('<ins class="adsbygoogle AdSenseLoader" style="display:block;" '
             . (XenForo_Application::debugMode() ? 'data-debug="yes"' : '')
             . 'data-ad-client="%s" data-ad-slot="%s" data-ad-format="%s"></ins>',

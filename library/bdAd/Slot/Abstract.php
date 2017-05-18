@@ -14,8 +14,11 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
         ));
     }
 
-    public function verifySlotOptions(bdAd_DataWriter_Slot $dw, array $slotOptions)
-    {
+    public function verifySlotOptions(
+        /** @noinspection PhpUnusedParameterInspection */
+        bdAd_DataWriter_Slot $dw,
+        array $slotOptions
+    ) {
         return true;
     }
 
@@ -37,8 +40,11 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
         return $thisSlot['slot_class'] === $otherSlot['slot_class'];
     }
 
-    public function allowUpload(array $slot, $optionKey)
-    {
+    public function allowUpload(
+        /** @noinspection PhpUnusedParameterInspection */
+        array $slot,
+        $optionKey
+    ) {
         return false;
     }
 
@@ -55,13 +61,21 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
         );
     }
 
-    public function assertUploadedFile(array $slot, $optionKey, XenForo_Upload $file)
-    {
+    public function assertUploadedFile(
+        /** @noinspection PhpUnusedParameterInspection */
+        array $slot,
+        $optionKey,
+        XenForo_Upload $file
+    ) {
         return true;
     }
 
-    public function verifyAdOptions(bdAd_DataWriter_Ad $dw, array $slot, array $adOptions)
-    {
+    public function verifyAdOptions(
+        /** @noinspection PhpUnusedParameterInspection */
+        bdAd_DataWriter_Ad $dw,
+        array $slot,
+        array $adOptions
+    ) {
         return true;
     }
 
@@ -139,8 +153,11 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
         $template->setParam('slotOptionsForums', $forums);
     }
 
-    protected function _prepareAdOptions_helperSlotOptionsUsername(XenForo_Template_Abstract $template, array $slot)
-    {
+    protected function _prepareAdOptions_helperSlotOptionsUsername(
+        XenForo_Template_Abstract $template,
+        /** @noinspection PhpUnusedParameterInspection */
+        array $slot
+    ) {
         /** @var XenForo_Model_Phrase $phraseModel */
         $phraseModel = $this->getModelFromCache('XenForo_Model_Phrase');
         $phraseIds = $phraseModel->getPhraseIdInLanguagesByTitle('bdad_username');

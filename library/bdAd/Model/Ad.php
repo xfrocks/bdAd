@@ -197,10 +197,7 @@ class bdAd_Model_Ad extends XenForo_Model
     public function countAds(array $conditions = array(), array $fetchOptions = array())
     {
         $whereConditions = $this->prepareAdConditions($conditions, $fetchOptions);
-
-        $orderClause = $this->prepareAdOrderOptions($fetchOptions);
         $joinOptions = $this->prepareAdFetchOptions($fetchOptions);
-        $limitOptions = $this->prepareLimitFetchOptions($fetchOptions);
 
         return $this->_getDb()->fetchOne("
             SELECT COUNT(*)
@@ -357,8 +354,12 @@ class bdAd_Model_Ad extends XenForo_Model
         }
     }
 
-    protected function _prepareAdConditionsCustomized(array &$sqlConditions, array $conditions, array $fetchOptions)
-    {
+    protected function _prepareAdConditionsCustomized(
+        array &$sqlConditions,
+        array $conditions,
+        /** @noinspection PhpUnusedParameterInspection */
+        array $fetchOptions
+    ) {
         if (isset($conditions['slot_id'])) {
             if (is_array($conditions['slot_id'])) {
                 if (!empty($conditions['slot_id'])) {
