@@ -9,25 +9,6 @@ class bdAd_Listener
     public static $headerScripts = array();
     public static $noAd = false;
 
-    public static function load_class($class, array &$extend)
-    {
-        static $classes = array(
-            'bdCache_Model_Cache',
-
-            'XenForo_ControllerPublic_Misc',
-
-            'XenForo_ViewPublic_Forum_View',
-            'XenForo_ViewPublic_Search_Results',
-            'XenForo_ViewPublic_Thread_View',
-
-            'WidgetFramework_DataWriter_Widget',
-        );
-
-        if (in_array($class, $classes, true)) {
-            $extend[] = 'bdAd_' . $class;
-        }
-    }
-
     public static function template_post_render_PAGE_CONTAINER(
         /** @noinspection PhpUnusedParameterInspection */
         $templateName,
@@ -88,6 +69,48 @@ class bdAd_Listener
                 if (bdAd_Option::get('noAdPages', $majorSection)) {
                     self::$noAd = true;
                 }
+        }
+    }
+
+    public static function load_class_bdCache_Model_Cache($class, array &$extend)
+    {
+        if ($class === 'bdCache_Model_Cache') {
+            $extend[] = 'bdAd_bdCache_Model_Cache';
+        }
+    }
+
+    public static function load_class_XenForo_ControllerPublic_Misc($class, array &$extend)
+    {
+        if ($class === 'XenForo_ControllerPublic_Misc') {
+            $extend[] = 'bdAd_XenForo_ControllerPublic_Misc';
+        }
+    }
+
+    public static function load_class_XenForo_ViewPublic_Forum_View($class, array &$extend)
+    {
+        if ($class === 'XenForo_ViewPublic_Forum_View') {
+            $extend[] = 'bdAd_XenForo_ViewPublic_Forum_View';
+        }
+    }
+
+    public static function load_class_XenForo_ViewPublic_Search_Results($class, array &$extend)
+    {
+        if ($class === 'XenForo_ViewPublic_Search_Results') {
+            $extend[] = 'bdAd_XenForo_ViewPublic_Search_Results';
+        }
+    }
+
+    public static function load_class_XenForo_ViewPublic_Thread_View($class, array &$extend)
+    {
+        if ($class === 'XenForo_ViewPublic_Thread_View') {
+            $extend[] = 'bdAd_XenForo_ViewPublic_Thread_View';
+        }
+    }
+
+    public static function load_class_WidgetFramework_DataWriter_Widget($class, array &$extend)
+    {
+        if ($class === 'WidgetFramework_DataWriter_Widget') {
+            $extend[] = 'bdAd_WidgetFramework_DataWriter_Widget';
         }
     }
 }

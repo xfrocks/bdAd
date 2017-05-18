@@ -573,12 +573,14 @@
     <listener event_id="file_health_check" execute_order="10" callback_class="bdAd_Listener" callback_method="file_health_check" active="1" hint="" description=""/>
     <listener event_id="front_controller_pre_dispatch" execute_order="10" callback_class="bdAd_Listener" callback_method="front_controller_pre_dispatch" active="1" hint="" description=""/>
     <listener event_id="init_dependencies" execute_order="10" callback_class="bdAd_ShippableHelper_Updater" callback_method="onInitDependencies" active="1" hint="" description="bdAd_ShippableHelper_Updater::onInitDependencies"/>
-    <listener event_id="load_class_controller" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
-    <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
-    <listener event_id="load_class_model" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
-    <listener event_id="load_class_view" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class" active="1" hint="" description=""/>
-    <listener event_id="template_hook" execute_order="10" callback_class="bdAd_Engine" callback_method="onTemplateHook" active="1" hint="bdad_hook" description="bdAd_Engine::onTemplateHook($hookName=bdad_hook,...)"/>
-    <listener event_id="template_post_render" execute_order="10" callback_class="bdAd_Listener" callback_method="template_post_render_PAGE_CONTAINER" active="1" hint="PAGE_CONTAINER" description=""/>
+    <listener event_id="load_class_controller" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class_XenForo_ControllerPublic_Misc" active="1" hint="XenForo_ControllerPublic_Misc" description="XenForo_ControllerPublic_Misc"/>
+    <listener event_id="load_class_datawriter" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class_WidgetFramework_DataWriter_Widget" active="1" hint="WidgetFramework_DataWriter_Widget" description="WidgetFramework_DataWriter_Widget"/>
+    <listener event_id="load_class_model" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class_bdCache_Model_Cache" active="1" hint="bdCache_Model_Cache" description="bdCache_Model_Cache"/>
+    <listener event_id="load_class_view" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class_XenForo_ViewPublic_Forum_View" active="1" hint="XenForo_ViewPublic_Forum_View" description="XenForo_ViewPublic_Forum_View"/>
+    <listener event_id="load_class_view" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class_XenForo_ViewPublic_Search_Results" active="1" hint="XenForo_ViewPublic_Search_Results" description="XenForo_ViewPublic_Search_Results"/>
+    <listener event_id="load_class_view" execute_order="10" callback_class="bdAd_Listener" callback_method="load_class_XenForo_ViewPublic_Thread_View" active="1" hint="XenForo_ViewPublic_Thread_View" description="XenForo_ViewPublic_Thread_View"/>
+    <listener event_id="template_hook" execute_order="10" callback_class="bdAd_Engine" callback_method="onTemplateHook" active="1" hint="bdad_hook" description="bdad_hook"/>
+    <listener event_id="template_post_render" execute_order="10" callback_class="bdAd_Listener" callback_method="template_post_render_PAGE_CONTAINER" active="1" hint="PAGE_CONTAINER" description="PAGE_CONTAINER"/>
     <listener event_id="widget_framework_ready" execute_order="10" callback_class="bdAd_Listener" callback_method="widget_framework_ready" active="1" hint="" description=""/>
   </code_event_listeners>
   <cron>
