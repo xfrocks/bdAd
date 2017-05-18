@@ -2,7 +2,7 @@
 
 class bdAd_Engine
 {
-    const VERSION = 2016112201;
+    const VERSION = 2017051801;
     const DATA_REGISTRY_ACTIVE_ADS = 'bdAd_activeAds';
     const SIMPLE_CACHE_ACTIVE_SLOT_CLASSES = 'bdAd_activeSlotClasses';
 
@@ -139,9 +139,15 @@ class bdAd_Engine
                     || empty($data['version'])
                     || $data['version'] < self::VERSION
                 ) {
-                    /** @var bdAd_Model_Slot $slotModel */
-                    $slotModel = $dataRegistryModel->getModelFromCache('bdAd_Model_Slot');
-                    $data = self::refreshActiveAds($slotModel);
+                    // never refresh data on demand
+                    $data = array();
+
+                    if (XenForo_Application::debugMode()
+                        || (XenForo_Application::isRegistered('session')
+                            && XenForo_Visitor::getInstance()->get('is_admin'))
+                    ) {
+                        XenForo_Error::logError('Please rebuild [bd] Advertisement cached data...');
+                    }
                 }
             }
 
