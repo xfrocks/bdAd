@@ -3,6 +3,9 @@
 class bdAd_Listener
 {
     public static $adHasBeenServed = false;
+    public static $clickTrackingAdIds = array();
+    public static $loggedViewAdIds = array();
+
     public static $headerScripts = array();
     public static $noAd = false;
 

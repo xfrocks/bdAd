@@ -199,10 +199,12 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         $mapping = array(
             '{title}' => $this->_prepareAdHtml_helperAdPhrase($ad, 'title'),
             '{description}' => $this->_prepareAdHtml_helperAdPhrase($ad, 'description'),
-            '{link}' => $this->_prepareAdHtml_helperLink($ad),
         );
 
         switch ($slot['slot_options']['adLayout']) {
+            case self::AD_LAYOUT_TEXT:
+                $mapping['{link}'] = $this->_prepareAdHtml_helperLink($ad);
+                break;
             case self::AD_LAYOUT_IMAGE:
                 // image url
                 $imageWidth = XenForo_Template_Helper_Core::styleProperty('sidebar.width')
@@ -216,9 +218,11 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                 $mapping['{imageUrl}'] = $imageUrl;
                 $mapping['{imageWidth}'] = $imageWidth;
                 $mapping['{imageHeight}'] = $imageHeight;
+                $mapping['{link}'] = $this->_prepareAdHtml_helperLink($ad);
                 break;
             case self::AD_LAYOUT_HTML:
                 $mapping['{html}'] = $ad['ad_options']['html'];
+                $mapping['{link}'] = $this->_prepareAdHtml_helperLink($ad);
                 break;
             case self::AD_LAYOUT_ADSENSE:
                 $mapping['{adsbygoogle}'] = $this->_prepareAdHtml_adsense_render($ad, $slot);

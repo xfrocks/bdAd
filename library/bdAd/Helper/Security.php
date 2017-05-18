@@ -9,6 +9,8 @@ class bdAd_Helper_Security
             'sid' => XenForo_Application::getSession()->getSessionId(),
         );
 
+        bdAd_Listener::$clickTrackingAdIds[] = $adId;
+
         return XenForo_Link::buildPublicLink('full:misc/ads/click', null, array(
             'redirect' => $link,
             'ad_id' => $adId,

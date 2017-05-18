@@ -259,12 +259,17 @@ class bdAd_Engine
         return false;
     }
 
-    public function getServedSlotAndAd($adSlotId)
+    public function getServedSlotAndAd($adSlotId = null)
     {
         $slot = null;
         $ad = null;
 
-        if (isset($this->_servedAds[$adSlotId])) {
+        if ($adSlotId === null) {
+            $servedAdIds = array_keys($this->_servedAds);
+            $adSlotId = reset($servedAdIds);
+        }
+
+        if (!empty($adSlotId) && isset($this->_servedAds[$adSlotId])) {
             list($slotId, $ad) = $this->_servedAds[$adSlotId];
 
             if (isset($this->_servedSlots[$slotId])) {
@@ -273,11 +278,6 @@ class bdAd_Engine
         }
 
         return array($slot, $ad);
-    }
-
-    public function getServedAdIds()
-    {
-        return array_keys($this->_servedAds);
     }
 
     private function _updateActiveSlotClasses()

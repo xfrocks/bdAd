@@ -35,6 +35,8 @@ class bdAd_Model_Log extends XenForo_Model
             . ' INTO xf_bdad_view (ad_id)
 			VALUES (?)
 		', $adId);
+
+        bdAd_Listener::$loggedViewAdIds[] = $adId;
     }
 
     public function logAdViews(array $adIds)
@@ -48,6 +50,10 @@ class bdAd_Model_Log extends XenForo_Model
             . ' INTO xf_bdad_view (ad_id)
 			VALUES (%s)
 		', implode('), (', $adIds)));
+
+        foreach ($adIds as $adId) {
+            bdAd_Listener::$loggedViewAdIds[] = $adId;
+        }
     }
 
     public function aggregateAdViews()
