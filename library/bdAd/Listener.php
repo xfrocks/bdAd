@@ -88,6 +88,10 @@ class bdAd_Listener
 
     public static function load_class_XenForo_ViewPublic_Forum_View($class, array &$extend)
     {
+        if (!XenForo_Application::getOptions()->get('bdAd_slotThread')) {
+            return;
+        }
+
         if ($class === 'XenForo_ViewPublic_Forum_View') {
             $extend[] = 'bdAd_XenForo_ViewPublic_Forum_View';
         }
@@ -95,6 +99,13 @@ class bdAd_Listener
 
     public static function load_class_XenForo_ViewPublic_Search_Results($class, array &$extend)
     {
+        $xenOptions = XenForo_Application::getOptions();
+        if (!$xenOptions->get('bdAd_slotThread')
+            && !$xenOptions->get('bdAd_slotPost')
+        ) {
+            return;
+        }
+
         if ($class === 'XenForo_ViewPublic_Search_Results') {
             $extend[] = 'bdAd_XenForo_ViewPublic_Search_Results';
         }
@@ -102,6 +113,10 @@ class bdAd_Listener
 
     public static function load_class_XenForo_ViewPublic_Thread_View($class, array &$extend)
     {
+        if (!XenForo_Application::getOptions()->get('bdAd_slotPost')) {
+            return;
+        }
+
         if ($class === 'XenForo_ViewPublic_Thread_View') {
             $extend[] = 'bdAd_XenForo_ViewPublic_Thread_View';
         }

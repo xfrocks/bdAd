@@ -4,10 +4,17 @@ class bdAd_Model_Slot extends XenForo_Model
 {
     public function getSlotClasses()
     {
-        return array(
-            'bdAd_Slot_Post',
-            'bdAd_Slot_Thread',
-        );
+        $classes = array();
+
+        if (!!bdAd_Option::get('slotPost')) {
+            $classes[] = 'bdAd_Slot_Post';
+        }
+
+        if (!!bdAd_Option::get('slotThread')) {
+            $classes[] = 'bdAd_Slot_Thread';
+        }
+
+        return $classes;
     }
 
     public function getSlotClassTitles()

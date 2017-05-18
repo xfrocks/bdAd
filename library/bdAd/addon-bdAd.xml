@@ -194,7 +194,13 @@
 
 	<input type="hidden" name="ad_options_slot_id" value="{$slot.slot_id}" />
 </div>]]></template>
-    <template title="bdad_ad_options_post"><![CDATA[<div class="baseHtml">
+    <template title="bdad_ad_options_post"><![CDATA[<xen:set var="$optionEnabled"><xen:callback class="bdAd_Option"
+	method="get">slotPost</xen:callback></xen:set><xen:if is="!{$optionEnabled}"><p>
+	{xen:phrase bdad_this_slot_class_has_been_disabled_via_option,
+		'link={xen:adminlink options/list/bdAd}'}
+</p></xen:if>
+
+<div class="baseHtml">
 	<ul>
 		<xen:include template="bdad_ad_options__slot_options_forumIds" />
 		<xen:include template="bdad_ad_options__slot_options_search" />
@@ -210,7 +216,13 @@
 	<xen:set var="$label">{xen:phrase avatar}</xen:set>
 	<xen:set var="$hint">{xen:phrase optional}</xen:set>
 </xen:include>]]></template>
-    <template title="bdad_ad_options_thread"><![CDATA[<div class="baseHtml">
+    <template title="bdad_ad_options_thread"><![CDATA[<xen:set var="$optionEnabled"><xen:callback class="bdAd_Option"
+	method="get">slotThread</xen:callback></xen:set><xen:if is="!{$optionEnabled}"><p>
+	{xen:phrase bdad_this_slot_class_has_been_disabled_via_option,
+		'link={xen:adminlink options/list/bdAd}'}
+</p></xen:if>
+
+<div class="baseHtml">
 	<ul>
 		<xen:include template="bdad_ad_options__slot_options_forumIds" />
 		<xen:include template="bdad_ad_options__slot_options_search" />
@@ -597,6 +609,18 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
       <sub_options>*</sub_options>
       <relation group_id="bdAd" display_order="500"/>
     </option>
+    <option option_id="bdAd_slotPost" edit_format="onoff" data_type="unsigned_integer" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdAd" display_order="100"/>
+    </option>
+    <option option_id="bdAd_slotThread" edit_format="onoff" data_type="unsigned_integer" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="bdAd" display_order="100"/>
+    </option>
   </optiongroups>
   <permissions>
     <permission_groups/>
@@ -684,6 +708,7 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
     <phrase title="bdad_sponsored_text" global_cache="1" version_id="1" version_string="0.9-dev"><![CDATA[Sponsored]]></phrase>
     <phrase title="bdad_sponsored_text_explain" version_id="1" version_string="0.9-dev"><![CDATA[Enter custom sponsored text if any. Left blank to use the phrase bdad_sponsored_text ("{phrase}").]]></phrase>
     <phrase title="bdad_sponsored_text_label" version_id="1" version_string="0.9-dev"><![CDATA[Sponsored Text]]></phrase>
+    <phrase title="bdad_this_slot_class_has_been_disabled_via_option" version_id="1030001" version_string="1.3.0"><![CDATA[<span style="color: red">This slot class has been disabled via <a href="{link}" target="_blank" tabindex=-1">option</a>.</span>]]></phrase>
     <phrase title="bdad_thread_index" version_id="1" version_string="0.9-dev"><![CDATA[Thread Index]]></phrase>
     <phrase title="bdad_thread_index_explain" version_id="1" version_string="0.9-dev"><![CDATA[Select position (in thread list, search result list) below which ads will be served. Please note that index starts from 0 (zero).]]></phrase>
     <phrase title="bdad_translations" version_id="1" version_string="0.9-dev"><![CDATA[Translations]]></phrase>
@@ -696,6 +721,10 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
     <phrase title="cron_entry_bdAd_Log_runHourly" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement: Aggregate Logs Hourly]]></phrase>
     <phrase title="option_bdAd_noAdPages" version_id="1020000" version_string="1.2.0"><![CDATA[Pages without ads]]></phrase>
     <phrase title="option_bdAd_noAdPages_explain" version_id="1020000" version_string="1.2.0"><![CDATA[Select pages that you don't want to show any ads (regardless of positions).]]></phrase>
+    <phrase title="option_bdAd_slotPost" version_id="1030001" version_string="1.3.0"><![CDATA[Use Promoted Post]]></phrase>
+    <phrase title="option_bdAd_slotPost_explain" version_id="1030001" version_string="1.3.0"><![CDATA[]]></phrase>
+    <phrase title="option_bdAd_slotThread" version_id="1030001" version_string="1.3.0"><![CDATA[Use Promoted Thread]]></phrase>
+    <phrase title="option_bdAd_slotThread_explain" version_id="1030001" version_string="1.3.0"><![CDATA[]]></phrase>
     <phrase title="option_group_bdAd" version_id="1000100" version_string="1.0.1"><![CDATA[[bd] Advertisement]]></phrase>
     <phrase title="option_group_bdAd_description" version_id="1000100" version_string="1.0.1"><![CDATA[]]></phrase>
     <phrase title="permission_general_bdAd_noAd" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement: Ad Free Access]]></phrase>
@@ -729,7 +758,7 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 .adWidget-image img { width: 100%; }
 .adWidget-gpt { overflow: hidden; width: 100%; }
 .adWidget-gpt > .adContainer { margin: 0 auto; }]]></template>
-    <template title="bdad_post" version_id="1020101" version_string="1.2.1"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
+    <template title="bdad_post" version_id="1030001" version_string="1.3.0"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
 	method="getAdIdsShouldBeServed"
 	params="{xen:array 'position=post',
 		'forum={$forum}',
@@ -903,13 +932,13 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
       <find><![CDATA[#^.+$#s]]></find>
       <replace><![CDATA[$0
 
-<xen:include template="bdad_post" />]]></replace>
+<xen:if is="{$xenOptions.bdAd_slotPost}"><xen:include template="bdad_post" /></xen:if>]]></replace>
     </modification>
     <modification template="thread_list_item" modification_key="bdad_thread_list_item" description="bdAd_Slot_Thread: thread list position." execution_order="10" enabled="1" action="preg_replace">
       <find><![CDATA[#^.+$#s]]></find>
       <replace><![CDATA[$0
 
-<xen:include template="bdad_thread_list_item" />]]></replace>
+<xen:if is="{$xenOptions.bdAd_slotThread}"><xen:include template="bdad_thread_list_item" /></xen:if>]]></replace>
     </modification>
   </public_template_modifications>
   <bb_code_media_sites/>
