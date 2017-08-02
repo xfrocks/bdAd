@@ -238,6 +238,11 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
 
     protected function _adIdsShouldBeServed_helperLogAdView(array $ad)
     {
+        if (!empty($ad['ad_config_options']['tracking']['skipView'])) {
+            // ad has been configured to skip view logging
+            return;
+        }
+
         /** @var bdAd_Model_Log $logModel */
         $logModel = $this->getModelFromCache('bdAd_Model_Log');
         $logModel->logAdView($ad['ad_id']);
@@ -259,11 +264,21 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
 
     protected function _prepareAdHtml_helperLink(array $ad)
     {
-        if (isset($ad['ad_options']['link'])) {
-            return bdAd_Helper_Security::getClickTrackingUrl($ad['ad_id'], $ad['ad_options']['link']);
+        if (!isset($ad['ad_options']['link'])) {
+            return '';
+        }
+        $link = $ad['ad_options']['link'];
+
+        if (empty($link)) {
+            return '';
         }
 
-        return '';
+        if (!empty($ad['ad_config_options']['tracking']['skipClick'])) {
+            // ad has been configured to skip click logging
+            return $link;
+        }
+
+        return bdAd_Helper_Security::getClickTrackingUrl($ad['ad_id'], $link);
     }
 
     protected function _prepareAdHtml_helperUploadUrl(array $ad, $optionKey)

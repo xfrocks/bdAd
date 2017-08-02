@@ -102,6 +102,7 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
         // get configuration options
         $configOptions = $this->_input->filter(array(
             'user_criteria' => XenForo_Input::ARRAY_SIMPLE,
+            'tracking' => XenForo_Input::ARRAY_SIMPLE,
         ));
         $dw->set('ad_config_options', $configOptions);
 

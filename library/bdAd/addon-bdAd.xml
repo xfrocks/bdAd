@@ -51,6 +51,7 @@
 	<ul class="tabs Tabs" data-panes="#adPanes > li">
 		<li class="active"><a>{xen:phrase bdad_ad_options}</a></li>
 		<li><a>{xen:phrase bdad_user_targeting}</a></li>
+		<li><a>{xen:phrase bdad_ad_tracking}</a></li>
 	</ul>
 	
 	<ul id="adPanes">
@@ -72,6 +73,16 @@
 				<xen:set var="$noDateFields">1</xen:set>
 			</xen:include>
 			<xen:include template="helper_criteria_user_field" />
+		</li>
+		<li>
+			<xen:checkboxunit label="">
+				<xen:option name="tracking[skipView]" value="1" selected="{$ad.ad_config_options.tracking.skipView}">
+					{xen:phrase bdad_ad_tracking_skip_view}
+				</xen:option>
+				<xen:option name="tracking[skipClick]" value="1" selected="{$ad.ad_config_options.tracking.skipClick}">
+					{xen:phrase bdad_ad_tracking_skip_click}
+				</xen:option>
+			</xen:checkboxunit>
 		</li>
 	</ul>
 
@@ -149,8 +160,8 @@
 		<xen:label>{$ad.ad_name}</xen:label>
 		<xen:snippet>
 			{$ad.phrases.title}
-			/ {xen:phrase bdad_x_views, 'count={xen:number $ad.view_count, 0}'}
-			/ {xen:phrase bdad_x_clicks, 'count={xen:number $ad.click_count, 0}'}
+			{xen:if 'empty({$ad.ad_config_options.tracking.skipView})', '/ {xen:phrase bdad_x_views, 'count={xen:number $ad.view_count, 0}'}'}
+			{xen:if 'empty({$ad.ad_config_options.tracking.skipClick})', '/ {xen:phrase bdad_x_clicks, 'count={xen:number $ad.click_count, 0}'}'}
 		</xen:snippet>
 		<xen:popup title="{xen:phrase controls}" ctrlclass="toolsCtrl">
 			<xen:link href="{xen:adminlink 'ads/disable', $ad, '_xfToken={$visitor.csrf_token_page}'}" displayif="{$ad.active}">{xen:phrase disable}</xen:link>
@@ -671,6 +682,9 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
     <phrase title="bdad_ad_please_confirm" version_id="1" version_string="0.9-dev"><![CDATA[Please confirm that you want to delete the following ad]]></phrase>
     <phrase title="bdad_ad_save" version_id="1" version_string="0.9-dev"><![CDATA[Save Ad]]></phrase>
     <phrase title="bdad_ad_title" version_id="1" version_string="0.9-dev"><![CDATA[Title]]></phrase>
+    <phrase title="bdad_ad_tracking" version_id="1030100" version_string="1.3.1"><![CDATA[Tracking]]></phrase>
+    <phrase title="bdad_ad_tracking_skip_click" version_id="1030100" version_string="1.3.1"><![CDATA[Do not track clicks]]></phrase>
+    <phrase title="bdad_ad_tracking_skip_view" version_id="1030100" version_string="1.3.1"><![CDATA[Do not track views]]></phrase>
     <phrase title="bdad_ad_unit_path" version_id="1000100" version_string="1.0.1"><![CDATA[Ad Unit Path]]></phrase>
     <phrase title="bdad_ad_x" version_id="1" version_string="0.9-dev"><![CDATA[Ad #{number}]]></phrase>
     <phrase title="bdad_enabled_forums" version_id="1" version_string="0.9-dev"><![CDATA[Enabled Forums]]></phrase>
