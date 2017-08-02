@@ -30,7 +30,7 @@
 
         var adSlot = $widget.data('adSlot'),
             loaderVersion = parseInt($widget.data('loaderVersion'));
-        if (!adSlot || loaderVersion !== 2017080201) {
+        if (!adSlot || loaderVersion !== 2017080202) {
             return;
         }
 
@@ -100,8 +100,8 @@
             adSenseGotScript = 1;
         }
 
-        $loader.append('<ins class="adsbygoogle" style="display:block" ' +
-            'data-ad-client="' + adsenseClient +
+        $loader.append('<ins class="adsbygoogle renderedAd"' +
+            ' data-ad-client="' + adsenseClient +
             '" data-ad-slot="' + adsenseSlot +
             '" data-ad-format="' + adsenseFormat +
             '"></ins>');
@@ -173,7 +173,8 @@
             return;
         }
 
-        var containerId = $loader.uniqueId().attr('id'),
+        var $container = $('<ins class="renderedAd"></ins>').appendTo($loader),
+            containerId = $container.uniqueId().attr('id'),
             gptUnitPath = $ad.data('gptUnitPath'),
             gptSizeWidth = parseInt($ad.data('gptSizeWidth')),
             gptSizeHeight = parseInt($ad.data('gptSizeHeight')),
@@ -186,8 +187,8 @@
 
         if (gptSizeWidth > 0 && gptSizeHeight > 0) {
             gptSize = [gptSizeWidth, gptSizeHeight];
-            $loader.css('width', gptSizeWidth + 'px');
-            $loader.css('height', gptSizeHeight + 'px');
+            $container.css('width', gptSizeWidth + 'px');
+            $container.css('height', gptSizeHeight + 'px');
         }
 
         window.googletag.cmd.push(function () {

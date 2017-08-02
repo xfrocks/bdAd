@@ -219,7 +219,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         $mapping['{_adStyles}'] = 'display: none';
 
         $adAttributes = array(
-            ' data-loader-version="2017080201"',
+            ' data-loader-version="2017080202"',
             sprintf(' data-ad-layout="%s"', htmlentities($slot['slot_options']['adLayout'])),
         );
         if (XenForo_Application::debugMode()) {
@@ -325,8 +325,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         $adsRendered = array();
         foreach ($ads as $ad) {
             $adsRendered[] = sprintf(
-                '<ins style="display:block"'
-                . ' data-gpt-unit-path="%s" data-gpt-size-width="%d" data-gpt-size-height="%d"></ins>',
+                '<ins data-gpt-unit-path="%s" data-gpt-size-width="%d" data-gpt-size-height="%d"></ins>',
                 htmlentities($ad['ad_options']['adUnitPath']),
                 $ad['ad_options']['sizeWidth'],
                 $ad['ad_options']['sizeHeight']
