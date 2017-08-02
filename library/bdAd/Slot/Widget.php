@@ -25,6 +25,12 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                 break;
         }
 
+        if (!empty($slotOptions['hideSidebar'])
+            && !empty($slotOptions['hideNonSidebar'])
+        ) {
+            $dw->error(new XenForo_Phrase('bdad_slot_options_error_cannot_both_hide'), 'slot_options');
+        }
+
         return parent::verifySlotOptions($dw, $slotOptions);
     }
 
@@ -194,42 +200,60 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         parent::_adIdsShouldBeServed_helperLogAdView($ad);
     }
 
-    protected function _prepareAdHtml(array $ad, array $slot, $htmlWithPlaceholders)
+    protected function _prepareAdHtmlMapping(array $ad, array $slot, array $mapping)
     {
-        $mapping = array(
-            '{title}' => $this->_prepareAdHtml_helperAdPhrase($ad, 'title'),
-            '{description}' => $this->_prepareAdHtml_helperAdPhrase($ad, 'description'),
+        $mapping['{_adStyles}'] = 'display: none';
+
+        $adAttributes = array(
+            ' data-loader-version="2017080201"',
+            sprintf(' data-ad-layout="%s"', htmlentities($slot['slot_options']['adLayout'])),
         );
+        if (XenForo_Application::debugMode()) {
+            $adAttributes[] = ' data-debug="yes"';
+        }
+        if (!empty($slot['slot_options']['hideSidebar'])) {
+            $adAttributes[] = sprintf(
+                ' data-max-client-width="%d"',
+                XenForo_Template_Helper_Core::styleProperty('maxResponsiveWideWidth')
+            );
+        } elseif (!empty($slot['slot_options']['hideNonSidebar'])) {
+            $adAttributes[] = sprintf(
+                ' data-min-client-width="%d"',
+                XenForo_Template_Helper_Core::styleProperty('maxResponsiveWideWidth')
+            );
+        }
 
         switch ($slot['slot_options']['adLayout']) {
             case self::AD_LAYOUT_TEXT:
+                $mapping['{title}'] = $this->_prepareAdHtml_helperAdPhrase($ad, 'title');
+                $mapping['{description}'] = $this->_prepareAdHtml_helperAdPhrase($ad, 'description');
                 $mapping['{link}'] = $this->_prepareAdHtml_helperLink($ad);
                 break;
             case self::AD_LAYOUT_IMAGE:
-                // image url
-                $imageWidth = XenForo_Template_Helper_Core::styleProperty('sidebar.width')
-                    - XenForo_Template_Helper_Core::styleProperty('secondaryContent.padding-left')
-                    - XenForo_Template_Helper_Core::styleProperty('secondaryContent.padding-right');
-                $imageHeight = $imageWidth;
                 $imageUrl = $this->_prepareAdHtml_helperUploadUrl($ad, 'image');
                 if (empty($imageUrl)) {
-                    $imageUrl = sprintf('http://placehold.it/%dx%d', $imageWidth, $imageHeight);
+                    $imageWidth = $slot['slot_options']['width'];
+                    $imageHeight = $slot['slot_options']['height'];
+                    if ($imageWidth > 0 && $imageHeight > 0) {
+                        $imageUrl = sprintf('http://placehold.it/%dx%d', $imageWidth, $imageHeight);
+                    }
                 }
+                if (empty($imageUrl)) {
+                    return null;
+                }
+
                 $mapping['{imageUrl}'] = $imageUrl;
-                $mapping['{imageWidth}'] = $imageWidth;
-                $mapping['{imageHeight}'] = $imageHeight;
                 $mapping['{link}'] = $this->_prepareAdHtml_helperLink($ad);
                 break;
             case self::AD_LAYOUT_HTML:
                 $mapping['{html}'] = $ad['ad_options']['html'];
-                $mapping['{link}'] = $this->_prepareAdHtml_helperLink($ad);
                 break;
             case self::AD_LAYOUT_ADSENSE:
-                $mapping['{adsbygoogle}'] = $this->_prepareAdHtml_adsense_render($ad, $slot);
+                $adAttributes = $this->_prepareAdHtmlMapping_adsenseAttributes($ad, $slot, $adAttributes);
                 break;
             case self::AD_LAYOUT_GPT:
                 if (empty($slot['slot_options']['responsiveAds'])) {
-                    $gptRendered = $this->_prepareAdHtml_gpt_render($ad, $slot);
+                    $gptRendered = $this->_prepareAdHtmlMapping_gptAds(array($ad), $slot);
                 } else {
                     // responsive ads: get all ads for this slot
                     $engine = bdAd_Engine::getInstance();
@@ -252,54 +276,50 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                     if (empty($adsByWidth)) {
                         // no ads have width configured?!
                         // render the randomly picked one
-                        $gptRendered = $this->_prepareAdHtml_gpt_render($ad, $slot);
-                    } elseif (count($adsByWidth) < 2) {
-                        // only one ad, render it directly
-                        $gptRendered = $this->_prepareAdHtml_gpt_render($ad, $slot);
+                        $gptRendered = $this->_prepareAdHtmlMapping_gptAds(array($ad), $slot);
                     } else {
-                        $gptRendered = $this->_prepareAdHtml_gpt_renderAdSet($adsByWidth, $slot);
+                        $adAttributes[] = ' data-gpt-responsive="yes"';
+                        $gptRendered = $this->_prepareAdHtmlMapping_gptAds($adsByWidth, $slot);
                     }
                 }
-                $mapping['{googletag.display}'] = $gptRendered;
+
+                $mapping['{ads}'] = $gptRendered;
                 break;
         }
 
-        return str_replace(array_keys($mapping), array_values($mapping), $htmlWithPlaceholders);
+        $mapping['{_adAttributes}'] .= implode('', $adAttributes);
+
+        return $mapping;
     }
 
-    protected function _prepareAdHtml_adsense_render(
-        array $ad,
-        /** @noinspection PhpUnusedParameterInspection */
-        array $slot
-    ) {
-        return sprintf('<ins class="adsbygoogle AdSenseLoader" style="display:block;" '
-            . (XenForo_Application::debugMode() ? 'data-debug="yes"' : '')
-            . 'data-ad-client="%s" data-ad-slot="%s" data-ad-format="%s"></ins>',
-            $ad['ad_options']['publisherId'], $ad['ad_options']['slotId'],
-            !empty($ad['ad_options']['format']) ? $ad['ad_options']['format'] : 'auto');
-    }
-
-    protected function _prepareAdHtml_gpt_render(array $ad, array $slot)
+    protected function _prepareAdHtmlMapping_adsenseAttributes(array $ad, array $slot, array $adAttributes)
     {
-        return sprintf('<ins class="GptLoader" style="display:block;" '
-            . (XenForo_Application::debugMode() ? 'data-debug="yes"' : '')
-            . (!empty($slot['slot_options']['hideNonSidebar']) ? sprintf(' data-min-client-width="%d"',
-                XenForo_Template_Helper_Core::styleProperty('maxResponsiveWideWidth')) : '')
-            . 'data-ad-unit-path="%s" data-ad-size-width="%d" data-ad-size-height="%d"></ins>',
-            htmlentities($ad['ad_options']['adUnitPath']),
-            $ad['ad_options']['sizeWidth'], $ad['ad_options']['sizeHeight']);
+        $adAttributes[] = sprintf(
+            ' data-adsense-client="%s" data-adsense-slot="%s" data-adsense-format="%s"',
+            htmlentities($ad['ad_options']['publisherId']),
+            htmlentities($ad['ad_options']['slotId']),
+            !empty($ad['ad_options']['format']) ? htmlentities($ad['ad_options']['format']) : 'auto'
+        );
+
+        return $adAttributes;
     }
 
-    protected function _prepareAdHtml_gpt_renderAdSet(array $adsByWidth, array $slot)
+    protected function _prepareAdHtmlMapping_gptAds(array $ads, array $slot)
     {
-        krsort($adsByWidth);
+        krsort($ads);
 
         $adsRendered = array();
-        foreach ($adsByWidth as $adWidth => $ad) {
-            $adsRendered[] = $this->_prepareAdHtml_gpt_render($ad, $slot);
+        foreach ($ads as $ad) {
+            $adsRendered[] = sprintf(
+                '<ins style="display:block"'
+                . ' data-gpt-unit-path="%s" data-gpt-size-width="%d" data-gpt-size-height="%d"></ins>',
+                htmlentities($ad['ad_options']['adUnitPath']),
+                $ad['ad_options']['sizeWidth'],
+                $ad['ad_options']['sizeHeight']
+            );
         }
 
-        return sprintf('<div class="ad-set">%s</div>', implode('', $adsRendered));
+        return implode('', $adsRendered);
     }
 
     protected function _getSlotOptionsTemplate()

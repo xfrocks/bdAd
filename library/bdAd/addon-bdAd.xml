@@ -563,13 +563,20 @@
 				<xen:option label="{xen:phrase bdad_responsive_ads}"
 						name="{$inputPrefix}[responsiveAds]" value="1"
 						selected="{xen:if '{$slotOptions.adLayout} === "gpt"', $slotOptions.responsiveAds, 1}" />
-				<xen:option label="{xen:phrase bdad_hide_non_sidebar}"
-						name="{$inputPrefix}[hideNonSidebar]" value="1"
-						selected="{$slotOptions.hideNonSidebar}" />
 			</xen:checkbox>
 		</xen:disabled>
 	</xen:option>
 </xen:radiounit>
+
+<xen:checkboxunit label="">
+	<xen:option label="{xen:phrase bdad_hide_sidebar}"
+			name="{$inputPrefix}[hideSidebar]" value="1"
+			selected="{$slotOptions.hideSidebar}" />
+
+	<xen:option label="{xen:phrase bdad_hide_non_sidebar}"
+			name="{$inputPrefix}[hideNonSidebar]" value="1"
+			selected="{$slotOptions.hideNonSidebar}" />
+</xen:checkboxunit>
 
 <input type="hidden" name="{$inputPrefix}[widgetId]]" value="{$slotOptions.widgetId}" />]]></template>
     <template title="bdad_widget_options_slot"><![CDATA[<xen:include template="bdad_slot_options__widget">
@@ -668,7 +675,8 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
     <phrase title="bdad_ad_x" version_id="1" version_string="0.9-dev"><![CDATA[Ad #{number}]]></phrase>
     <phrase title="bdad_enabled_forums" version_id="1" version_string="0.9-dev"><![CDATA[Enabled Forums]]></phrase>
     <phrase title="bdad_enable_slot" version_id="1" version_string="0.9-dev"><![CDATA[Enable Slot]]></phrase>
-    <phrase title="bdad_hide_non_sidebar" version_id="1010000" version_string="1.1.0"><![CDATA[Hide For Non-Sidebar Browser]]></phrase>
+    <phrase title="bdad_hide_non_sidebar" version_id="1030100" version_string="1.3.1"><![CDATA[Hide on Mobile (browsers without sidebar)]]></phrase>
+    <phrase title="bdad_hide_sidebar" version_id="1030100" version_string="1.3.1"><![CDATA[Hide on Desktop (browsers with sidebar)]]></phrase>
     <phrase title="bdad_link" version_id="1" version_string="0.9-dev"><![CDATA[Link]]></phrase>
     <phrase title="bdad_no_ad_pages_account" version_id="1020000" version_string="1.2.0"><![CDATA[Account Pages (/account/…)]]></phrase>
     <phrase title="bdad_no_ad_pages_members" version_id="1020000" version_string="1.2.0"><![CDATA[Member Pages (/members/…)]]></phrase>
@@ -695,7 +703,8 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
     <phrase title="bdad_slot_not_found" version_id="1" version_string="0.9-dev"><![CDATA[The requested slot could not be found]]></phrase>
     <phrase title="bdad_slot_no_results" version_id="1" version_string="0.9-dev"><![CDATA[No slot could be found...]]></phrase>
     <phrase title="bdad_slot_options_cannot_verified" version_id="1" version_string="0.9-dev"><![CDATA[Slot options cannot be verified.]]></phrase>
-    <phrase title="bdad_slot_options_error_cannot_both_responsive_non_sidebar" version_id="1010000" version_string="1.1.0"><![CDATA[Cannot enable both Responsive Ads and Hide For Non-Sidebar options.]]></phrase>
+    <phrase title="bdad_slot_options_error_cannot_both_hide" version_id="1030100" version_string="1.3.1"><![CDATA[Cannot enable both Hide on Desktop and Mobile options.]]></phrase>
+    <phrase title="bdad_slot_options_error_cannot_both_responsive_non_sidebar" version_id="1030100" version_string="1.3.1"><![CDATA[Cannot enable both Responsive Ads and Hide on Mobile options.]]></phrase>
     <phrase title="bdad_slot_options_error_widget_id_required" version_id="1" version_string="0.9-dev"><![CDATA[The associated widget must be specified.]]></phrase>
     <phrase title="bdad_slot_options_forum_ids_explain" version_id="1" version_string="0.9-dev"><![CDATA[Select forums in which ads should be served. Select none to enable ads for all forums.]]></phrase>
     <phrase title="bdad_slot_options_search_toggle" version_id="1" version_string="0.9-dev"><![CDATA[Check this box to serve ads in search results page]]></phrase>
@@ -737,7 +746,7 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
   </route_prefixes>
   <style_properties/>
   <templates>
-    <template title="bdad.css" version_id="1000100" version_string="1.0.1"><![CDATA[.discussionListItem.adAsThread .listBlock { background-color: #ffffec; }
+    <template title="bdad.css" version_id="1030100" version_string="1.3.1"><![CDATA[.discussionListItem.adAsThread .listBlock { background-color: #ffffec; }
 .discussionList .adAsThread .lastPost { text-align: center; }
 .adAsThread .lastPost > span {
 	background: #efc439;
@@ -755,9 +764,9 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 .searchResult.adAsPost { background-color: #ffffec; }
 .searchResult.adAsPost .avatar img { max-width: 48px; max-height: 48px; }
 
+.adWidget { display: block; margin: 0 auto; overflow: hidden; width: 100%; }
 .adWidget-image img { width: 100%; }
-.adWidget-gpt { overflow: hidden; width: 100%; }
-.adWidget-gpt > .adContainer { margin: 0 auto; }]]></template>
+]]></template>
     <template title="bdad_post" version_id="1030001" version_string="1.3.0"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
 	method="getAdIdsShouldBeServed"
 	params="{xen:array 'position=post',
@@ -895,27 +904,24 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 </xen:if>
 
 <xen:edithint template="thread_list_item" />]]></template>
-    <template title="bdad_widget_slot" version_id="1020200" version_string="1.2.2"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
+    <template title="bdad_widget_slot" version_id="1030100" version_string="1.3.1"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
 	method="getAdIdsShouldBeServed"
 	params="{xen:array 'slotId={$widget.options.slotId}'}">bdAd_Slot_Widget</xen:callback></xen:set>
 <xen:if is="{$adIds}">
 	<xen:require css="bdad.css" />
+	<xen:require js="js/bdAd/loader.min.js" />
 
 	<xen:hook name="bdad_hook" params="{xen:array 'slotClass=bdAd_Slot_Widget', 'adIds={$adIds}'}">
-		<div class="adWidget adWidget-{$widget.options.slotOptions.adLayout}{_adClass}"{_adAttributes}>
-			<xen:if is="{$widget.options.slotOptions.adLayout} == 'image'">
-				<a href="{link}" rel="nofollow"><img src="{imageUrl}" /></a>
-			<xen:elseif is="{$widget.options.slotOptions.adLayout} == 'html'"/>
-				{html}
-			<xen:elseif is="{$widget.options.slotOptions.adLayout} == 'adsense'"/>
-				<xen:require js="js/bdAd/loader.min.js" />
-				{adsbygoogle}
-			<xen:elseif is="{$widget.options.slotOptions.adLayout} == 'gpt'"/>
-				<xen:require js="js/bdAd/loader.min.js" />
-				{googletag.display}
-			<xen:else />
+		<div class="adWidget adWidget-{$widget.options.slotOptions.adLayout}{_adClass}" style="{_adStyles}"{_adAttributes}>
+			<xen:if is="{$widget.options.slotOptions.adLayout} === 'text'">
 				<h4><a href="{link}" rel="nofollow">{title}</a></h4>
 				<p>{description}</p>
+			<xen:elseif is="{$widget.options.slotOptions.adLayout} === 'image'" />
+				<a href="{link}" rel="nofollow"><img src="{imageUrl}" /></a>
+			<xen:elseif is="{$widget.options.slotOptions.adLayout} === 'html'"/>
+				{html}
+			<xen:elseif is="{$widget.options.slotOptions.adLayout} === 'gpt'"/>
+				{ads}
 			</xen:if>
 		</div>
 	</xen:hook>

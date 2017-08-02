@@ -129,13 +129,11 @@ class bdAd_Slot_Thread extends bdAd_Slot_Abstract
         return $this->_adIdsShouldBeServed_helperMarkServed($slot['slot_id'], $ad);
     }
 
-    protected function _prepareAdHtml(array $ad, array $slot, $htmlWithPlaceholders)
+    protected function _prepareAdHtmlMapping(array $ad, array $slot, array $mapping)
     {
-        $mapping = array(
-            '{title}' => $this->_prepareAdHtml_helperAdPhrase($ad, 'title'),
-            '{description}' => $this->_prepareAdHtml_helperAdPhrase($ad, 'description'),
-            '{link}' => $this->_prepareAdHtml_helperLink($ad),
-        );
+        $mapping['{title}'] = $this->_prepareAdHtml_helperAdPhrase($ad, 'title');
+        $mapping['{description}'] = $this->_prepareAdHtml_helperAdPhrase($ad, 'description');
+        $mapping['{link}'] = $this->_prepareAdHtml_helperLink($ad);
 
         // avatar url
         $avatarUrl = $this->_prepareAdHtml_helperUploadUrl($ad, 'avatar');
@@ -152,9 +150,8 @@ class bdAd_Slot_Thread extends bdAd_Slot_Abstract
         }
         $mapping['{sponsoredText}'] = $sponsoredText;
 
-        return str_replace(array_keys($mapping), array_values($mapping), $htmlWithPlaceholders);
+        return $mapping;
     }
-
 
     protected function _getSlotOptionsTemplate()
     {

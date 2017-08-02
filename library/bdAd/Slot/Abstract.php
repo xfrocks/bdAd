@@ -87,18 +87,25 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
             return '';
         }
 
-        $html = $this->_prepareAdHtml($ad, $slot, $htmlWithPlaceholders);
-
-        if (!empty($html)) {
-            $mapping = array(
-                '{_adClass}' => sprintf(' ad-%d slot-%d', $ad['ad_id'], $slot['slot_id']),
-                '{_adAttributes}' => sprintf(' data-ad-id="%d"', $ad['ad_id']),
-            );
-
-            $html = str_replace(array_keys($mapping), array_values($mapping), $html);
+        $mapping = $this->_prepareAdHtmlMapping($ad, $slot, array(
+            '{_adClass}' => sprintf(' ad-%d slot-%d', $ad['ad_id'], $slot['slot_id']),
+            '{_adAttributes}' => sprintf(' data-ad-id="%d" data-ad-slot="%d"', $ad['ad_id'], $slot['slot_id']),
+        ));
+        if (!is_array($mapping)) {
+            return '';
         }
 
+        $html = str_replace(array_keys($mapping), array_values($mapping), $htmlWithPlaceholders);
         return $html;
+    }
+
+    /**
+     * @return string
+     * @deprecated
+     */
+    final protected function _prepareAdHtml()
+    {
+        return '';
     }
 
     protected function _getSlotOptionsTemplate()
@@ -236,7 +243,7 @@ abstract class bdAd_Slot_Abstract extends XenForo_Model
         $logModel->logAdView($ad['ad_id']);
     }
 
-    abstract protected function _prepareAdHtml(array $ad, array $slot, $htmlWithPlaceholders);
+    abstract protected function _prepareAdHtmlMapping(array $ad, array $slot, array $mapping);
 
     protected function _prepareAdHtml_helperAdPhrase(array $ad, $type)
     {
