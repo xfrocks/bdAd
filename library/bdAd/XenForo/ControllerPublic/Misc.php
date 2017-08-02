@@ -4,8 +4,6 @@ class bdAd_XenForo_ControllerPublic_Misc extends XFCP_bdAd_XenForo_ControllerPub
 {
     public function actionAdsClick()
     {
-        $redirect = $this->_input->filterSingle('redirect', XenForo_Input::STRING);
-
         $adId = bdAd_Helper_Security::verifyClickTrackingData($this->_input);
         if ($adId > 0) {
             /** @var bdAd_Model_Log $logModel */
@@ -13,9 +11,11 @@ class bdAd_XenForo_ControllerPublic_Misc extends XFCP_bdAd_XenForo_ControllerPub
             $logModel->logAdClick($adId);
         }
 
-        return $this->responseRedirect(
-            XenForo_ControllerResponse_Redirect::RESOURCE_CANONICAL_PERMANENT,
-            $redirect
+        $viewParams = array(
+            'target' => $this->_input->filterSingle('redirect', XenForo_Input::STRING),
         );
+
+        $this->_routeMatch->setResponseType('raw');
+        return $this->responseView('bdAd_ViewPublic_Ads_Click', '', $viewParams);
     }
 }
