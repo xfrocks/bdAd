@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="bdAd" title="[bd] Advertisement" version_string="1.3.2" version_id="1030201" url="" install_callback_class="bdAd_Installer" install_callback_method="install" uninstall_callback_class="bdAd_Installer" uninstall_callback_method="uninstall">
+<addon addon_id="bdAd" title="[bd] Advertisement" version_string="1.3.2" version_id="1030202" url="" install_callback_class="bdAd_Installer" install_callback_method="install" uninstall_callback_class="bdAd_Installer" uninstall_callback_method="uninstall">
   <admin_navigation>
     <navigation navigation_id="bdAd" parent_navigation_id="setup" display_order="9999" link="ads" admin_permission_id="bdAd" debug_only="0" hide_no_children="0"/>
     <navigation navigation_id="bdAd_ads" parent_navigation_id="bdAd" display_order="1" link="ads" admin_permission_id="" debug_only="0" hide_no_children="0"/>
@@ -760,7 +760,7 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
   </route_prefixes>
   <style_properties/>
   <templates>
-    <template title="bdad.css" version_id="1030200" version_string="1.3.2"><![CDATA[.discussionListItem.adAsThread .listBlock { background-color: #ffffec; }
+    <template title="bdad.css" version_id="1030201" version_string="1.3.2"><![CDATA[.discussionListItem.adAsThread .listBlock { background-color: #ffffec; }
 .discussionList .adAsThread .lastPost { text-align: center; }
 .adAsThread .lastPost > span {
 	background: #efc439;
@@ -788,7 +788,10 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 		margin: 0 auto;
 		overflow: hidden;
 	}
-	.adWidget-image img { width: 100%; }
+	.adWidget-image img {
+		height: auto;
+		width: 100%;
+	}
 ]]></template>
     <template title="bdad_post" version_id="1030001" version_string="1.3.0"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
 	method="getAdIdsShouldBeServed"
@@ -927,7 +930,7 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 </xen:if>
 
 <xen:edithint template="thread_list_item" />]]></template>
-    <template title="bdad_widget_slot" version_id="1030100" version_string="1.3.1"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
+    <template title="bdad_widget_slot" version_id="1030201" version_string="1.3.2"><![CDATA[<xen:set var="$adIds"><xen:callback class="bdAd_Engine"
 	method="getAdIdsShouldBeServed"
 	params="{xen:array 'slotId={$widget.options.slotId}'}">bdAd_Slot_Widget</xen:callback></xen:set>
 <xen:if is="{$adIds}">
@@ -937,10 +940,16 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 	<xen:hook name="bdad_hook" params="{xen:array 'slotClass=bdAd_Slot_Widget', 'adIds={$adIds}'}">
 		<div class="adWidget adWidget-{$widget.options.slotOptions.adLayout}{_adClass}" style="{_adStyles}"{_adAttributes}>
 			<xen:if is="{$widget.options.slotOptions.adLayout} === 'text'">
-				<h4><a href="{link}" rel="nofollow">{title}</a></h4>
-				<p>{description}</p>
+				<div class="renderedAd">
+					<h4><a href="{link}" rel="nofollow">{title}</a></h4>
+					<p>{description}</p>
+				</div>
 			<xen:elseif is="{$widget.options.slotOptions.adLayout} === 'image'" />
-				<a href="{link}" rel="nofollow"><img src="{imageUrl}" /></a>
+				<div class="renderedAd" style="{_renderedAdStyles}">
+					<a href="{link}" rel="nofollow">
+						<img src="{imageUrl}" />
+					</a>
+				</div>
 			<xen:elseif is="{$widget.options.slotOptions.adLayout} === 'html'"/>
 				{html}
 			<xen:elseif is="{$widget.options.slotOptions.adLayout} === 'gpt'"/>

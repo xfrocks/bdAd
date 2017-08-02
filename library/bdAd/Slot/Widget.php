@@ -245,18 +245,26 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                 break;
             case self::AD_LAYOUT_IMAGE:
                 $imageUrl = $this->_prepareAdHtml_helperUploadUrl($ad, 'image');
-                if (empty($imageUrl)) {
-                    $imageWidth = $slot['slot_options']['width'];
-                    $imageHeight = $slot['slot_options']['height'];
-                    if ($imageWidth > 0 && $imageHeight > 0) {
-                        $imageUrl = sprintf('http://placehold.it/%dx%d', $imageWidth, $imageHeight);
-                    }
+                $imageWidth = intval($slot['slot_options']['width']);
+                $imageHeight = intval($slot['slot_options']['height']);
+                if (empty($imageUrl)
+                    && $imageWidth > 0
+                    && $imageHeight > 0
+                ) {
+                    $imageUrl = sprintf('http://placehold.it/%dx%d', $imageWidth, $imageHeight);
                 }
                 if (empty($imageUrl)) {
                     return null;
                 }
 
+                $renderedAdStyles = array();
+                if ($imageWidth > 0 && $imageHeight > 0
+                ) {
+                    $renderedAdStyles[] = sprintf('width:%dpx;height:%dpx', $imageWidth, $imageHeight);
+                }
+
                 $mapping['{imageUrl}'] = $imageUrl;
+                $mapping['{_renderedAdStyles}'] = implode('', $renderedAdStyles);
                 $mapping['{link}'] = $this->_prepareAdHtml_helperLink($ad);
                 break;
             case self::AD_LAYOUT_HTML:
