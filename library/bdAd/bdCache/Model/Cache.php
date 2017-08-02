@@ -39,7 +39,7 @@ class bdAd_bdCache_Model_Cache extends XFCP_bdAd_bdCache_Model_Cache
         }
 
         $htmlRef =& $cached[bdCache_Model_Cache::DATA_OUTPUT];
-        $pattern = '#href="(?<url>[^"]+misc/ads/click[^"]+)"#';
+        $pattern = '#href="(?<u' . 'rl>[^"]+misc/ads/click[^"]+)"#';
         $offset = 0;
         while (true) {
             if (!preg_match($pattern, $htmlRef, $matches, PREG_OFFSET_CAPTURE, $offset)) {

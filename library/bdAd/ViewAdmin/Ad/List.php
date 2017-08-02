@@ -30,5 +30,4 @@ class bdAd_ViewAdmin_Ad_List extends XenForo_ViewAdmin_Base
             unset($this->_params['ads']);
         }
     }
-
 }

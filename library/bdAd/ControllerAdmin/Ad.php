@@ -348,6 +348,7 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
      */
     protected function _getAdModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdAd_Model_Ad');
     }
 
@@ -356,7 +357,7 @@ class bdAd_ControllerAdmin_Ad extends XenForo_ControllerAdmin_Abstract
      */
     protected function _getSlotModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdAd_Model_Slot');
     }
-
 }

@@ -25,8 +25,12 @@ class bdAd_WidgetFramework_WidgetRenderer_Slot extends WidgetFramework_WidgetRen
         return 'bdad_widget_slot';
     }
 
-    protected function _render(array $widget, $positionCode, array $params, XenForo_Template_Abstract $renderTemplateObject)
-    {
+    protected function _render(
+        array $widget,
+        $positionCode,
+        array $params,
+        XenForo_Template_Abstract $renderTemplateObject
+    ) {
         return $renderTemplateObject;
     }
 }

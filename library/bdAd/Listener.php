@@ -10,7 +10,6 @@ class bdAd_Listener
     public static $noAd = false;
 
     public static function template_post_render_PAGE_CONTAINER(
-        /** @noinspection PhpUnusedParameterInspection */
         $templateName,
         &$content,
         array &$containerData,
@@ -33,11 +32,8 @@ class bdAd_Listener
         $renderers[] = 'bdAd_WidgetFramework_WidgetRenderer_Slot';
     }
 
-    public static function file_health_check(
-        /** @noinspection PhpUnusedParameterInspection */
-        XenForo_ControllerAdmin_Abstract $controller,
-        array &$hashes
-    ) {
+    public static function file_health_check(XenForo_ControllerAdmin_Abstract $controller, array &$hashes)
+    {
         $hashes += bdAd_FileSums::getHashes();
     }
 
@@ -56,11 +52,8 @@ class bdAd_Listener
         return call_user_func_array($method, $args);
     }
 
-    public static function front_controller_pre_dispatch(
-        /** @noinspection PhpUnusedParameterInspection */
-        XenForo_FrontController $fc,
-        XenForo_RouteMatch &$routeMatch
-    ) {
+    public static function front_controller_pre_dispatch(XenForo_FrontController $fc, XenForo_RouteMatch &$routeMatch)
+    {
         $majorSection = $routeMatch->getMajorSection();
 
         switch ($majorSection) {

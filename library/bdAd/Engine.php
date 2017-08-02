@@ -203,7 +203,10 @@ class bdAd_Engine
             foreach ($this->_adsGrouped[$slotId] as $adId => $ad) {
                 if (!empty($ad['ad_config_options']['user_criteria'])
                     && !XenForo_Helper_Criteria::userMatchesCriteria(
-                        $ad['ad_config_options']['user_criteria'], true, $visitor)
+                        $ad['ad_config_options']['user_criteria'],
+                        true,
+                        $visitor
+                    )
                 ) {
                     continue;
                 }
@@ -232,7 +235,10 @@ class bdAd_Engine
 
                 if (!empty($ad['ad_config_options']['user_criteria'])
                     && !XenForo_Helper_Criteria::userMatchesCriteria(
-                        $ad['ad_config_options']['user_criteria'], true, $visitor)
+                        $ad['ad_config_options']['user_criteria'],
+                        true,
+                        $visitor
+                    )
                 ) {
                     continue;
                 }
@@ -296,5 +302,4 @@ class bdAd_Engine
 
         self::$_activeSlotClasses = array_keys($slotClasses);
     }
-
 }

@@ -166,8 +166,7 @@ class bdAd_Model_Ad extends XenForo_Model
                 $joinOptions[joinTables]
             WHERE $whereConditions
                 $orderClause
-            ", $limitOptions['limit'], $limitOptions['offset']
-        ), 'ad_id');
+            ", $limitOptions['limit'], $limitOptions['offset']), 'ad_id');
 
         // prepare the phrases
         foreach ($ads as &$ad) {
@@ -389,5 +388,4 @@ class bdAd_Model_Ad extends XenForo_Model
     {
         // customized code goes here
     }
-
 }

@@ -13,5 +13,4 @@ class bdAd_XenForo_ViewPublic_Forum_View extends XFCP_bdAd_XenForo_ViewPublic_Fo
             }
         }
     }
-
 }

@@ -17,5 +17,4 @@ class bdAd_ViewAdmin_Slot_Edit extends XenForo_ViewAdmin_Base
             }
         }
     }
-
 }

@@ -19,8 +19,10 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                 if (!empty($slotOptions['responsiveAds'])
                     && !empty($slotOptions['hideNonSidebar'])
                 ) {
-                    $dw->error(new XenForo_Phrase('bdad_slot_options_error_cannot_both_responsive_non_sidebar'),
-                        'slot_options');
+                    $dw->error(
+                        new XenForo_Phrase('bdad_slot_options_error_cannot_both_responsive_non_sidebar'),
+                        'slot_options'
+                    );
                 }
                 break;
         }
@@ -100,11 +102,13 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                     $fileHeight = intval($file->getImageInfoField('height'));
                     if ($width > 0 && $height > 0) {
                         if ($fileWidth < $width || $fileHeight < $height) {
-                            throw new XenForo_Exception(new XenForo_Phrase('bdad_please_upload_image_dimension_x_y',
+                            throw new XenForo_Exception(new XenForo_Phrase(
+                                'bdad_please_upload_image_dimension_x_y',
                                 array(
                                     'width' => $width,
                                     'height' => $height,
-                                )));
+                                )
+                            ));
                         }
                     } elseif ($width > 0) {
                         if ($fileWidth < $width) {
@@ -137,29 +141,39 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                 break;
             case self::AD_LAYOUT_ADSENSE:
                 if (empty($adOptions['publisherId'])) {
-                    $dw->error(new XenForo_Phrase('bdad_ad_options_error_option_x_required',
-                        array('option' => new XenForo_Phrase('bdad_ad_adsense_publisher_id'))), 'ad_options');
+                    $dw->error(new XenForo_Phrase(
+                        'bdad_ad_options_error_option_x_required',
+                        array('option' => new XenForo_Phrase('bdad_ad_adsense_publisher_id'))
+                    ), 'ad_options');
                 }
 
                 if (empty($adOptions['slotId'])) {
-                    $dw->error(new XenForo_Phrase('bdad_ad_options_error_option_x_required',
-                        array('option' => new XenForo_Phrase('bdad_ad_adsense_slot_id'))), 'ad_options');
+                    $dw->error(new XenForo_Phrase(
+                        'bdad_ad_options_error_option_x_required',
+                        array('option' => new XenForo_Phrase('bdad_ad_adsense_slot_id'))
+                    ), 'ad_options');
                 }
                 break;
             case self::AD_LAYOUT_GPT:
                 if (empty($adOptions['adUnitPath'])) {
-                    $dw->error(new XenForo_Phrase('bdad_ad_options_error_option_x_required',
-                        array('option' => new XenForo_Phrase('bdad_ad_unit_path'))), 'ad_options');
+                    $dw->error(new XenForo_Phrase(
+                        'bdad_ad_options_error_option_x_required',
+                        array('option' => new XenForo_Phrase('bdad_ad_unit_path'))
+                    ), 'ad_options');
                 }
 
                 if (empty($adOptions['sizeWidth'])) {
-                    $dw->error(new XenForo_Phrase('bdad_ad_options_error_option_x_required',
-                        array('option' => new XenForo_Phrase('width'))), 'ad_options');
+                    $dw->error(new XenForo_Phrase(
+                        'bdad_ad_options_error_option_x_required',
+                        array('option' => new XenForo_Phrase('width'))
+                    ), 'ad_options');
                 }
 
                 if (empty($adOptions['sizeHeight'])) {
-                    $dw->error(new XenForo_Phrase('bdad_ad_options_error_option_x_required',
-                        array('option' => new XenForo_Phrase('height'))), 'ad_options');
+                    $dw->error(new XenForo_Phrase(
+                        'bdad_ad_options_error_option_x_required',
+                        array('option' => new XenForo_Phrase('height'))
+                    ), 'ad_options');
                 }
                 break;
             default:
@@ -331,5 +345,4 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
     {
         return 'bdad_ad_options_widget';
     }
-
 }

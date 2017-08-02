@@ -97,11 +97,8 @@ class bdAd_Installer
 
     /* End auto-generated lines of code. Feel free to make changes below */
 
-    public static function installCustomized(
-        /** @noinspection PhpUnusedParameterInspection */
-        $existingAddOn,
-        $addOnData
-    ) {
+    public static function installCustomized($existingAddOn, $addOnData)
+    {
         if (XenForo_Application::$versionId < 1020000) {
             throw new XenForo_Exception('[bd] Advertisement requires XenForo 1.2.0+');
         }
@@ -166,12 +163,13 @@ class bdAd_Installer
 
         $adSlots = $db->fetchAll('SELECT ad_id, slot_id FROM xf_bdad_ad');
         foreach ($adSlots as $adSlot) {
-            $db->query('REPLACE INTO xf_bdad_ad_slot (ad_id, slot_id) VALUES (?, ?)',
-                array($adSlot['ad_id'], $adSlot['slot_id']));
+            $db->query(
+                'REPLACE INTO xf_bdad_ad_slot (ad_id, slot_id) VALUES (?, ?)',
+                array($adSlot['ad_id'], $adSlot['slot_id'])
+            );
         }
 
         $db->query('ALTER TABLE xf_bdad_ad CHANGE slot_id slot_id_'
             . XenForo_Application::$time . ' INT(10) UNSIGNED');
     }
-
 }

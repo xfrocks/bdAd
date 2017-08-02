@@ -119,7 +119,8 @@ class bdAd_ControllerAdmin_Slot extends XenForo_ControllerAdmin_Abstract
         return $this->_getToggleResponse(
             $this->_getSlotModel()->getSlots(),
             'bdAd_DataWriter_Slot',
-            'ad-slots');
+            'ad-slots'
+        );
     }
 
     public function actionEnable()
@@ -194,7 +195,7 @@ class bdAd_ControllerAdmin_Slot extends XenForo_ControllerAdmin_Abstract
      */
     protected function _getSlotModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdAd_Model_Slot');
     }
-
 }

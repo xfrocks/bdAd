@@ -85,15 +85,18 @@ class bdAd_Model_Slot extends XenForo_Model
                 $joinOptions[joinTables]
             WHERE $whereConditions
                 $orderClause
-            ", $limitOptions['limit'], $limitOptions['offset']
-        ), 'slot_id');
+            ", $limitOptions['limit'], $limitOptions['offset']), 'slot_id');
 
         // parse all the options fields
         foreach ($slots as &$slot) {
             $slot['slot_options'] = @unserialize($slot['slot_options']);
-            if (empty($slot['slot_options'])) $slot['slot_options'] = array();
+            if (empty($slot['slot_options'])) {
+                $slot['slot_options'] = array();
+            }
             $slot['slot_config_options'] = @unserialize($slot['slot_config_options']);
-            if (empty($slot['slot_config_options'])) $slot['slot_config_options'] = array();
+            if (empty($slot['slot_config_options'])) {
+                $slot['slot_config_options'] = array();
+            }
         }
 
         $this->_getSlotsCustomized($slots, $fetchOptions);
@@ -211,5 +214,4 @@ class bdAd_Model_Slot extends XenForo_Model
     {
         // customized code goes here
     }
-
 }

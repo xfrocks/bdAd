@@ -102,12 +102,18 @@ class bdAd_DataWriter_Ad extends XenForo_DataWriter
     {
         $phraseTitle = $this->getExtraData(self::DATA_PHRASE_TITLE);
         if ($phraseTitle !== null) {
-            $this->_insertOrUpdateMasterPhrase(bdAd_Model_Ad::getPhraseTitleForTitle($this->get('ad_id')), $phraseTitle);
+            $this->_insertOrUpdateMasterPhrase(
+                bdAd_Model_Ad::getPhraseTitleForTitle($this->get('ad_id')),
+                $phraseTitle
+            );
         }
 
         $phraseDescription = $this->getExtraData(self::DATA_PHRASE_DESCRIPTION);
         if ($phraseDescription !== null) {
-            $this->_insertOrUpdateMasterPhrase(bdAd_Model_Ad::getPhraseTitleForDescription($this->get('ad_id')), $phraseDescription);
+            $this->_insertOrUpdateMasterPhrase(
+                bdAd_Model_Ad::getPhraseTitleForDescription($this->get('ad_id')),
+                $phraseDescription
+            );
         }
 
         $slotIds = $this->getExtraData(self::DATA_SLOT_IDS);
@@ -132,7 +138,8 @@ class bdAd_DataWriter_Ad extends XenForo_DataWriter
             /** @var XenForo_Model_Attachment $attachmentModel */
             $attachmentModel = $this->getModelFromCache('XenForo_Model_Attachment');
             $attachmentModel->deleteAttachmentsFromContentIds(
-                'bdad_ad', array($this->get('ad_id'))
+                'bdad_ad',
+                array($this->get('ad_id'))
             );
         }
 
@@ -176,6 +183,7 @@ class bdAd_DataWriter_Ad extends XenForo_DataWriter
      */
     protected function _getAdModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdAd_Model_Ad');
     }
 
@@ -184,8 +192,7 @@ class bdAd_DataWriter_Ad extends XenForo_DataWriter
      */
     protected function _getSlotModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdAd_Model_Slot');
     }
-
-
 }

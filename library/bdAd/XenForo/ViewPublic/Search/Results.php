@@ -46,5 +46,4 @@ class bdAd_XenForo_ViewPublic_Search_Results extends XFCP_bdAd_XenForo_ViewPubli
             }
         }
     }
-
 }

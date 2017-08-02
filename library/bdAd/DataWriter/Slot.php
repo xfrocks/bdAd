@@ -136,8 +136,10 @@ class bdAd_DataWriter_Slot extends XenForo_DataWriter
     {
         /** @var bdAd_Model_Ad $adModel */
         $adModel = $this->getModelFromCache('bdAd_Model_Ad');
-        $ads = $adModel->getAds(array('slot_id' => $this->get('slot_id')),
-            array('join' => bdAd_Model_Ad::FETCH_AD_SLOT | bdAd_Model_Ad::FETCH_AD_SLOTS));
+        $ads = $adModel->getAds(
+            array('slot_id' => $this->get('slot_id')),
+            array('join' => bdAd_Model_Ad::FETCH_AD_SLOT | bdAd_Model_Ad::FETCH_AD_SLOTS)
+        );
 
         foreach ($ads as $ad) {
             if (count($ad['adSlots']) > 1) {
@@ -185,8 +187,10 @@ class bdAd_DataWriter_Slot extends XenForo_DataWriter
         $existingSlotOptions = $this->getSlotOptions(true);
         if (!empty($existingSlotOptions['widgetId'])) {
             /** @var WidgetFramework_DataWriter_Widget $widgetDw */
-            $widgetDw = XenForo_DataWriter::create('WidgetFramework_DataWriter_Widget',
-                XenForo_DataWriter::ERROR_SILENT);
+            $widgetDw = XenForo_DataWriter::create(
+                'WidgetFramework_DataWriter_Widget',
+                XenForo_DataWriter::ERROR_SILENT
+            );
             if ($widgetDw->setExistingData($existingSlotOptions['widgetId'])) {
                 $widgetDw->delete();
             }
@@ -198,7 +202,7 @@ class bdAd_DataWriter_Slot extends XenForo_DataWriter
      */
     protected function _getSlotModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdAd_Model_Slot');
     }
-
 }

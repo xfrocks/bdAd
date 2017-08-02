@@ -101,6 +101,7 @@ class bdAd_WidgetFramework_DataWriter_Widget extends XFCP_bdAd_WidgetFramework_D
      */
     protected function _bdAd_getSlotModel()
     {
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this->getModelFromCache('bdAd_Model_Slot');
     }
 }

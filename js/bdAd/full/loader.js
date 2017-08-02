@@ -37,16 +37,24 @@
         var maxClientWidth = parseInt($widget.data('maxClientWidth'));
         if (maxClientWidth > 0 &&
             document.documentElement.clientWidth > maxClientWidth) {
-            debug('Ad Slot #%d: document.documentElement.clientWidth (%d) > maxClientWidth (%d)',
-                adSlot, document.documentElement.clientWidth, maxClientWidth);
+            debug(
+                'Ad Slot #%d: document.documentElement.clientWidth (%d) > maxClientWidth (%d)',
+                adSlot,
+                document.documentElement.clientWidth,
+                maxClientWidth
+            );
             return;
         }
 
         var minClientWidth = parseInt($widget.data('minClientWidth'));
         if (minClientWidth > 0 &&
             document.documentElement.clientWidth < minClientWidth) {
-            debug('Ad Slot #%d: document.documentElement.clientWidth (%d) < minClientWidth (%d)',
-                adSlot, document.documentElement.clientWidth, minClientWidth);
+            debug(
+                'Ad Slot #%d: document.documentElement.clientWidth (%d) < minClientWidth (%d)',
+                adSlot,
+                document.documentElement.clientWidth,
+                minClientWidth
+            );
             return;
         }
 
@@ -137,13 +145,20 @@
             if (responsive) {
                 var _adWidth = parseInt($_ad.data('gptSizeWidth'));
                 if (!(_adWidth > 0)) {
-                    debug('GPT Slot #%d: Invalid ad width',
-                        adSlot, _adWidth);
+                    debug(
+                        'GPT Slot #%d: Invalid ad width',
+                        adSlot,
+                        _adWidth
+                    );
                     return;
                 }
                 if (containerWidth < _adWidth) {
-                    debug('GPT Slot #%d: containerWidth (%d) < _adWidth (%d)',
-                        adSlot, containerWidth, _adWidth);
+                    debug(
+                        'GPT Slot #%d: containerWidth (%d) < _adWidth (%d)',
+                        adSlot,
+                        containerWidth,
+                        _adWidth
+                    );
                     return;
                 }
             }
@@ -179,8 +194,13 @@
             //noinspection JSUnresolvedFunction
             window.googletag.defineSlot(gptUnitPath, gptSize, containerId).addService(googletag.pubads());
             window.googletag.display(containerId);
-            debug('GPT Slot #%d: window.googletag.display(%s); # adUnitPath=%s, adSize',
-                adSlot, containerId, gptUnitPath, gptSize);
+            debug(
+                'GPT Slot #%d: window.googletag.display(%s); # adUnitPath=%s, adSize',
+                adSlot,
+                containerId,
+                gptUnitPath,
+                gptSize
+            );
         });
     };
 
