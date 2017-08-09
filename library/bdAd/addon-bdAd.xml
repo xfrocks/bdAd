@@ -760,7 +760,7 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
   </route_prefixes>
   <style_properties/>
   <templates>
-    <template title="bdad.css" version_id="1030201" version_string="1.3.2"><![CDATA[.discussionListItem.adAsThread .listBlock { background-color: #ffffec; }
+    <template title="bdad.css" version_id="1030202" version_string="1.3.2"><![CDATA[.discussionListItem.adAsThread .listBlock { background-color: #ffffec; }
 .discussionList .adAsThread .lastPost { text-align: center; }
 .adAsThread .lastPost > span {
 	background: #efc439;
@@ -786,6 +786,7 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 	.adWidget .renderedAd {
 		display: block;
 		margin: 0 auto;
+		max-width: 100%;
 		overflow: hidden;
 	}
 	.adWidget-image img {
