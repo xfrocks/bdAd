@@ -134,7 +134,9 @@
 </xen:form>]]></template>
     <template title="bdad_ad_list_grouped"><![CDATA[<xen:foreach loop="$slots" key="$slotId" value="$slot">
 	<li>
-		<h3 class="textHeading" id="{xen:helper listitemid, 'slot_{$slotId}'}">{$slot.slot_name}{xen:if '!{$slot.active}', ' ({xen:phrase disabled})'}
+		<h3 class="textHeading" id="{xen:helper listitemid, 'slot_{$slotId}'}">
+			<a href="{xen:adminlink ad-slots/edit, $slot}">{$slot.slot_name}</a>
+			{xen:if '!{$slot.active}', '({xen:phrase disabled})'}
 			<a href="{xen:adminlink 'ads/add', '', 'slot_id={$slotId}'}" class="add controls"><span>{xen:phrase bdad_ad_add_short}</span></a>
 		</h3>
 		<xen:if is="{$adsGrouped.{$slotId}}">
@@ -155,6 +157,7 @@
     <template title="bdad_ad_list_items"><![CDATA[<xen:foreach loop="$ads" value="$ad">
 	<xen:listitem
 		id="{$ad.ad_id}"
+		labelclass="{xen:if $ad.active, '', disabled}"
 		href="{xen:adminlink 'ads/edit', $ad}"
 		delete="{xen:adminlink 'ads/delete', $ad}">
 		<xen:label>{$ad.ad_name}</xen:label>
