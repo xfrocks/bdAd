@@ -119,8 +119,14 @@ class bdAd_Installer
             ) ENGINE=MEMORY DEFAULT CHARSET=utf8;
         ');
 
-        $db->query('REPLACE INTO `xf_content_type` (content_type, addon_id, fields) VALUES ("bdad_ad", "bdAd", "")');
-        $db->query('REPLACE INTO `xf_content_type_field` (content_type, field_name, field_value) VALUES ("bdad_ad", "attachment_handler_class", "bdAd_AttachmentHandler_Ad")');
+        $db->query(
+            'REPLACE INTO `xf_content_type` (content_type, addon_id, fields) VALUES (?, ?, ?)',
+            array('bdad_ad', 'bdAd', '')
+        );
+        $db->query(
+            'REPLACE INTO `xf_content_type_field` (content_type, field_name, field_value) VALUES (?, ?, ?)',
+            array('bdad_ad', 'attachment_handler_class', 'bdAd_AttachmentHandler_Ad')
+        );
 
         /** @var XenForo_Model_ContentType $contentTypeModel */
         $contentTypeModel = XenForo_Model::create('XenForo_Model_ContentType');
