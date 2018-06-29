@@ -1,10 +1,10 @@
 <?php
 
-// updated by DevHelper_Helper_ShippableHelper at 2016-07-21T19:54:19+00:00
+// updated by DevHelper_Helper_ShippableHelper at 2018-02-10T00:30:20+00:00
 
 /**
  * Class bdAd_ShippableHelper_Updater
- * @version 7
+ * @version 8
  * @see DevHelper_Helper_ShippableHelper_Updater
  */
 class bdAd_ShippableHelper_Updater
@@ -18,6 +18,9 @@ class bdAd_ShippableHelper_Updater
      * Verifies config to make sure the Updater should run.
      * 1. It has not been configured yet
      * 2. Or it has been enabled at some point
+     *
+     * Tips:
+     * 1. Wrap this call within a `if (isset($data['routesAdmin'])) { ... }` for small performance boost
      *
      * @param XenForo_Dependencies_Abstract $dependencies
      * @param string|null $apiUrl
@@ -72,8 +75,9 @@ class bdAd_ShippableHelper_Updater
             = 'bdAd_ShippableHelper_UpdaterCore';
 
         if (!isset($GLOBALS[self::KEY]['onPreRoute'][$apiUrl])) {
-            $GLOBALS[self::KEY]['onPreRoute'][$apiUrl] = create_function('$fc',
-                __CLASS__ . '::onPreRoute($fc, ' . var_export($config, true) . ');');
+            $GLOBALS[self::KEY]['onPreRoute'][$apiUrl] = function ($fc) use ($config) {
+                self::onPreRoute($fc, $config);
+            };
             XenForo_CodeEvent::addListener('front_controller_pre_route',
                 $GLOBALS[self::KEY]['onPreRoute'][$apiUrl]);
         }
@@ -87,6 +91,7 @@ class bdAd_ShippableHelper_Updater
      * @param string|null $apiUrl
      * @param string|null $addOnId
      * @throws Zend_Exception
+     * @throws XenForo_Exception
      */
     public static function onUninstall($apiUrl = null, $addOnId = null)
     {

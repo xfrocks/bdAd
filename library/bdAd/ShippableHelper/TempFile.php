@@ -1,16 +1,17 @@
 <?php
 
-// updated by DevHelper_Helper_ShippableHelper at 2017-05-18T06:47:56+00:00
+// updated by DevHelper_Helper_ShippableHelper at 2018-02-10T00:30:27+00:00
 
 /**
  * Class bdAd_ShippableHelper_TempFile
- * @version 12
+ * @version 16
  * @see DevHelper_Helper_ShippableHelper_TempFile
  */
 class bdAd_ShippableHelper_TempFile
 {
-    protected static $_maxDownloadSize = 0;
     protected static $_cached = array();
+    protected static $_latestDownloadHeaders = array();
+    protected static $_maxDownloadSize = 0;
     protected static $_registeredShutdownFunction = false;
 
     /**
@@ -53,6 +54,8 @@ class bdAd_ShippableHelper_TempFile
 
     public static function download($url, array $options = array())
     {
+        self::$_latestDownloadHeaders = array();
+
         $options += array(
             'tempFile' => '',
             'userAgent' => '',
@@ -95,6 +98,7 @@ class bdAd_ShippableHelper_TempFile
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_FILE, $fh);
         curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION, array(__CLASS__, 'download_curlHeaderFunction'));
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_NOPROGRESS, 0);
         curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, array(__CLASS__, 'download_curlProgressFunction'));
@@ -121,36 +125,43 @@ class bdAd_ShippableHelper_TempFile
         curl_close($ch);
         fclose($fh);
 
-        $downloaded = true;
+        $error = null;
         if (!isset($curlInfo['http_code'])
             || $curlInfo['http_code'] < 200
             || $curlInfo['http_code'] >= 300
         ) {
             // no http response status / non success status, must be an error
-            $downloaded = false;
+            $error = 'http_code';
         }
 
-        $fileSize = filesize($tempFile);
-        if ($downloaded && $fileSize === 0) {
-            clearstatcache();
+        $fileSize = 0;
+        if ($error === null) {
             $fileSize = filesize($tempFile);
+            if ($fileSize === 0) {
+                clearstatcache();
+                $fileSize = filesize($tempFile);
+            }
+        }
+        if ($error === null && $fileSize === 0) {
+            // no data written to disk, probably a disk error
+            $error = 'file size 0';
         }
 
-        if ($downloaded
+        if ($error === null
             && isset($curlInfo['size_download'])
             && $fileSize !== intval($curlInfo['size_download'])
         ) {
             // file size reported by our system seems to be off, probably a write error
-            $downloaded = false;
+            $error = sprintf('file size %d, size_download %d', $fileSize, $curlInfo['size_download']);
         }
 
-        if ($downloaded
+        if ($error === null
             && isset($curlInfo['download_content_length'])
             && $curlInfo['download_content_length'] > 0
             && $fileSize !== intval($curlInfo['download_content_length'])
         ) {
             // file size is different from Content-Length header, probably a cancelled download (or corrupted)
-            $downloaded = false;
+            $error = sprintf('file size %d, Content-Length %d', $fileSize, $curlInfo['download_content_length']);
         }
 
         if (XenForo_Application::debugMode()) {
@@ -158,17 +169,24 @@ class bdAd_ShippableHelper_TempFile
                 'download %s -> %s, %s, %s',
                 $url,
                 $tempFile,
-                ($downloaded ? 'succeeded' : 'failed'),
+                ($error === null ? 'succeeded' : ('failed: ' . $error)),
                 json_encode($curlInfo),
             )));
         }
 
-        if ($downloaded) {
+        if ($error === null) {
             return $tempFile;
         } else {
             file_put_contents($tempFile, '');
             return false;
         }
+    }
+
+    public static function download_curlHeaderFunction($curl, $header)
+    {
+        self::$_latestDownloadHeaders[] = $header;
+
+        return strlen($header);
     }
 
     public static function download_curlProgressFunction($downloadSize, $downloaded)
@@ -200,6 +218,11 @@ class bdAd_ShippableHelper_TempFile
         }
 
         self::$_cached = array();
+    }
+
+    public static function getLatestDownloadHeaders()
+    {
+        return self::$_latestDownloadHeaders;
     }
 
     protected static function _getPrefix()
