@@ -58,6 +58,7 @@ class bdAd_Listener
 
         switch ($majorSection) {
             case 'account':
+            case 'inbox':
             case 'members':
                 if (bdAd_Option::get('noAdPages', $majorSection)) {
                     self::$noAd = true;

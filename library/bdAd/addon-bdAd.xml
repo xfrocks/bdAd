@@ -127,7 +127,7 @@
 			<xen:edithint template="bdad_ad_list_items_slot_disabled" />
 		</ul>
 
-		<p class="sectionFooter">{xen:phrase showing_x_of_y_items, 'count=<span class="FilterListCount">{xen:count $ads}</span>', 'total={xen:count $ads}'}</p>
+		<p class="sectionFooter">&nbsp;</p>
 	<xen:else />
 		<div class="noResults">{xen:phrase bdad_ad_no_results}</div>
 	</xen:if>
@@ -626,6 +626,7 @@
     <option option_id="bdAd_noAdPages" edit_format="checkbox" data_type="array" can_backup="1">
       <default_value>a:1:{s:7:"account";s:1:"1";}</default_value>
       <edit_format_params>account = {xen:phrase bdad_no_ad_pages_account}
+inbox = {xen:phrase bdad_no_ad_pages_inbox}
 members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
       <sub_options>*</sub_options>
       <relation group_id="bdAd" display_order="500"/>
@@ -696,6 +697,7 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
     <phrase title="bdad_hide_sidebar" version_id="1030100" version_string="1.3.1"><![CDATA[Hide on Desktop (browsers with sidebar)]]></phrase>
     <phrase title="bdad_link" version_id="1" version_string="0.9-dev"><![CDATA[Link]]></phrase>
     <phrase title="bdad_no_ad_pages_account" version_id="1020000" version_string="1.2.0"><![CDATA[Account Pages (/account/…)]]></phrase>
+    <phrase title="bdad_no_ad_pages_inbox" version_id="1030203" version_string="1.3.2"><![CDATA[Inbox Pages (/conversations/…)]]></phrase>
     <phrase title="bdad_no_ad_pages_members" version_id="1020000" version_string="1.2.0"><![CDATA[Member Pages (/members/…)]]></phrase>
     <phrase title="bdad_please_upload_image_dimension_x_y" version_id="2" version_string="1.0.0"><![CDATA[Please upload a {width}x{height} image. You may upload a larger image but it must have the same width / height ratio.]]></phrase>
     <phrase title="bdad_please_upload_image_height_x" version_id="2" version_string="1.0.0"><![CDATA[Please upload an image with the minimum height of {height}px.]]></phrase>
@@ -746,7 +748,7 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
     <phrase title="bdad_x_views" version_id="1" version_string="0.9-dev"><![CDATA[{count} views]]></phrase>
     <phrase title="cron_entry_bdAd_Log_runHourly" version_id="1" version_string="0.9-dev"><![CDATA[[bd] Advertisement: Aggregate Logs Hourly]]></phrase>
     <phrase title="option_bdAd_noAdPages" version_id="1020000" version_string="1.2.0"><![CDATA[Pages without ads]]></phrase>
-    <phrase title="option_bdAd_noAdPages_explain" version_id="1020000" version_string="1.2.0"><![CDATA[Select pages that you don't want to show any ads (regardless of positions).]]></phrase>
+    <phrase title="option_bdAd_noAdPages_explain" version_id="1030203" version_string="1.3.2"><![CDATA[Select pages that you don't want to show any ads (regardless of positions). Another option is to put this into template where you want to hide ads: <span style="font-family: monospace">&lt;xen:callback class="bdAd_Helper_Template" method="renderNoAds" /&gt;</span>.]]></phrase>
     <phrase title="option_bdAd_slotPost" version_id="1030001" version_string="1.3.0"><![CDATA[Use Promoted Post]]></phrase>
     <phrase title="option_bdAd_slotPost_explain" version_id="1030001" version_string="1.3.0"><![CDATA[]]></phrase>
     <phrase title="option_bdAd_slotThread" version_id="1030001" version_string="1.3.0"><![CDATA[Use Promoted Thread]]></phrase>
@@ -970,11 +972,23 @@ members = {xen:phrase bdad_no_ad_pages_members}</edit_format_params>
 </xen:if>]]></template>
   </templates>
   <public_template_modifications>
+    <modification template="login" modification_key="bdad_login_render_no_ads" description="Render no ads for /login page." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#\A.+\z#s]]></find>
+      <replace><![CDATA[$0
+
+<xen:callback class="bdAd_Helper_Template" method="renderNoAds" />]]></replace>
+    </modification>
     <modification template="post" modification_key="bdad_post" description="bdAd_Slot_Post: post list position." execution_order="10" enabled="1" action="preg_replace">
       <find><![CDATA[#^.+$#s]]></find>
       <replace><![CDATA[$0
 
 <xen:if is="{$xenOptions.bdAd_slotPost}"><xen:include template="bdad_post" /></xen:if>]]></replace>
+    </modification>
+    <modification template="register_form" modification_key="bdad_register_form_render_no_ads" description="Render no ads for /register page." execution_order="10" enabled="1" action="preg_replace">
+      <find><![CDATA[#\A.+\z#s]]></find>
+      <replace><![CDATA[$0
+
+<xen:callback class="bdAd_Helper_Template" method="renderNoAds" />]]></replace>
     </modification>
     <modification template="thread_list_item" modification_key="bdad_thread_list_item" description="bdAd_Slot_Thread: thread list position." execution_order="10" enabled="1" action="preg_replace">
       <find><![CDATA[#^.+$#s]]></find>
