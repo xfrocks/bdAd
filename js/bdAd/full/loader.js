@@ -116,9 +116,6 @@
 
     var gptGotScript = 0;
     var gptLoader = function ($loader) {
-        var adSlot = $loader.data('adSlot'),
-            responsive = XenForo.isPositive($loader.data('gptResponsive'));
-
         //noinspection JSUndefinedPropertyAssignment
         window.googletag = window.googletag || {};
         window.googletag.cmd = googletag.cmd || [];
@@ -137,8 +134,21 @@
             gptGotScript = 1;
         }
 
-        var $ad = null;
-        var containerWidth = $loader.width();
+        var responsive = XenForo.isPositive($loader.data('gptResponsive'));
+        if (!responsive) {
+            return gptLoaderReal($loader, false);
+        } else {
+            setTimeout(function () {
+                gptLoaderReal($loader, true);
+            }, 1000);
+        }
+    };
+
+    var gptLoaderReal = function ($loader, responsive) {
+        var adSlot = $loader.data('adSlot'),
+            $ad = null,
+            containerWidth = $loader.width();
+
         $loader.children('ins').each(function () {
             var $_ad = $(this);
 
