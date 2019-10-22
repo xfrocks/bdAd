@@ -219,8 +219,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         $mapping['{_adStyles}'] = 'display: none';
 
         $adAttributes = array(
-            ' data-loader-version="2017080202"',
-            sprintf(' data-ad-layout="%s"', htmlentities($slot['slot_options']['adLayout'])),
+            ' data-loader-version="2019102201"',
         );
         if (XenForo_Application::debugMode()) {
             $adAttributes[] = ' data-debug="yes"';
@@ -274,6 +273,15 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                 $adAttributes = $this->_prepareAdHtmlMapping_adsenseAttributes($ad, $slot, $adAttributes);
                 break;
             case self::AD_LAYOUT_GPT:
+                if (preg_match('#^/bidgear/(\d+)/(div-.+)$#', $ad['ad_options']['adUnitPath'], $matches) === 1) {
+                    $bdId = $matches[1];
+                    $divId = $matches[2];
+                    $adAttributes = $this->_prepareAdHtmlMapping_bidgearAttributes($divId, $ad, $adAttributes);
+                    $mapping['{ads}'] = $this->_prepareAdHtmlMapping_bidgearAd($bdId, $divId);
+                    break;
+                }
+
+                $adAttributes[] = ' data-ad-layout="gpt"';
                 if (empty($slot['slot_options']['responsiveAds'])) {
                     $gptRendered = $this->_prepareAdHtmlMapping_gptAds(array($ad), $slot);
                 } else {
@@ -317,10 +325,31 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
     protected function _prepareAdHtmlMapping_adsenseAttributes(array $ad, array $slot, array $adAttributes)
     {
         $adAttributes[] = sprintf(
-            ' data-adsense-client="%s" data-adsense-slot="%s" data-adsense-format="%s"',
+            ' data-ad-layout="adsense" data-adsense-client="%s" data-adsense-slot="%s" data-adsense-format="%s"',
             htmlentities($ad['ad_options']['publisherId']),
             htmlentities($ad['ad_options']['slotId']),
             !empty($ad['ad_options']['format']) ? htmlentities($ad['ad_options']['format']) : 'auto'
+        );
+
+        return $adAttributes;
+    }
+
+    protected function _prepareAdHtmlMapping_bidgearAd($bdId, $divId)
+    {
+        return sprintf('<div bg-id="%1$d" id="%2$s-w"><div id="%2$s"></div></div>', $bdId, $divId);
+    }
+
+    protected function _prepareAdHtmlMapping_bidgearAttributes($divId, array $ad, array $adAttributes)
+    {
+        $adAttributes[] = sprintf(
+            ' data-ad-layout="bidgear" data-div-id="%s"' .
+            ' data-width="%d" data-height="%d"' .
+            ' data-script-head="%s" data-script-slot="%s"',
+            $divId,
+            $ad['ad_options']['sizeWidth'],
+            $ad['ad_options']['sizeHeight'],
+            htmlentities(bdAd_Option::get('bidgearScriptHead')),
+            htmlentities(bdAd_Option::get('bidgearScriptSlot'))
         );
 
         return $adAttributes;

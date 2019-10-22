@@ -30,7 +30,12 @@
 
         var adSlot = $widget.data('adSlot'),
             loaderVersion = parseInt($widget.data('loaderVersion'));
-        if (!adSlot || loaderVersion !== 2017080202) {
+        if (loaderVersion !== 2019102201) {
+            debug('Unrecognized loader version %s', loaderVersion);
+            return;
+        }
+        if (!adSlot) {
+            debug('No ad slot');
             return;
         }
 
@@ -63,6 +68,9 @@
         switch ($widget.data('adLayout')) {
             case 'adsense':
                 adSenseLoader($widget);
+                break;
+            case 'bidgear':
+                bidgearLoader($widget);
                 break;
             case 'gpt':
                 gptLoader($widget);
@@ -110,6 +118,69 @@
         window.adsbygoogle = window.adsbygoogle || [];
         window.adsbygoogle.push({});
         debug('AdSense Slot #%d: %s/%s/%s ok', adSlot, adsenseClient, adsenseSlot, adsenseFormat);
+    };
+
+    // *********************************************************************
+
+    var bidgearGotScript = 0;
+    var bidgearLoader = function ($loader) {
+        var adSlot = $loader.data('adSlot'),
+            divId = $loader.data('divId'),
+            sizeWidth = $loader.data('width'),
+            sizeHeight = $loader.data('height'),
+            scriptHead = $loader.data('scriptHead'),
+            scriptSlot = $loader.data('scriptSlot');
+
+        if (!divId) {
+            debug('BidGear Slot #%d: divId is missing', adSlot);
+            return;
+        }
+        if (!sizeWidth) {
+            debug('BidGear Slot #%d: sizeWidth is missing', adSlot);
+            return;
+        }
+        if (!sizeHeight) {
+            debug('BidGear Slot #%d: sizeHeight is missing', adSlot);
+            return;
+        }
+
+        if (!scriptHead) {
+            debug('BidGear Slot #%d: scriptHead is missing', adSlot);
+            return;
+        }
+        if (!scriptSlot) {
+            debug('BidGear Slot #%d: scriptSlot is missing', adSlot);
+            return;
+        }
+        if (bidgearGotScript === 0) {
+            //noinspection SpellCheckingInspection,JSUnresolvedFunction
+            $.getScript(scriptHead, function () {
+                $.getScript(scriptSlot, function () {
+                    bidgearGotScript = 3;
+
+                    bidgearBgiQueue.forEach(function (args) {
+                        window['bgI'](args[0], args[1], args[2], args[3]);
+                    });
+                });
+                bidgearGotScript = 2;
+            });
+            bidgearGotScript = 1;
+        }
+
+        console.log(divId);
+        var w = document.getElementById(divId + "-w");
+        console.log(w);
+
+        bidgearBgi(divId, 1, sizeWidth, sizeHeight);
+    };
+    var bidgearBgiQueue = [];
+    var bidgearBgi = function () {
+        var args = arguments;
+        if (bidgearGotScript === 3) {
+            window['bgI'](args[0], args[1], args[2], args[3]);
+        } else {
+            bidgearBgiQueue.push(args);
+        }
     };
 
     // *********************************************************************
