@@ -219,7 +219,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         $mapping['{_adStyles}'] = 'display: none';
 
         $adAttributes = array(
-            ' data-loader-version="2019102201"',
+            ' data-loader-version="2019102401"',
         );
         if (XenForo_Application::debugMode()) {
             $adAttributes[] = ' data-debug="yes"';
@@ -273,13 +273,7 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
                 $adAttributes = $this->_prepareAdHtmlMapping_adsenseAttributes($ad, $slot, $adAttributes);
                 break;
             case self::AD_LAYOUT_GPT:
-                if (preg_match('#^/bidgear/(\d+)/(div-.+)$#', $ad['ad_options']['adUnitPath'], $matches) === 1) {
-                    $bdId = $matches[1];
-                    $divId = $matches[2];
-                    $adAttributes = $this->_prepareAdHtmlMapping_bidgearAttributes($divId, $ad, $adAttributes);
-                    $mapping['{ads}'] = $this->_prepareAdHtmlMapping_bidgearAd($bdId, $divId);
-                    break;
-                }
+                $adAttributes = $this->_prepareAdHtmlMapping_bidgearAttributes($adAttributes);
 
                 $adAttributes[] = ' data-ad-layout="gpt"';
                 if (empty($slot['slot_options']['responsiveAds'])) {
@@ -334,23 +328,17 @@ class bdAd_Slot_Widget extends bdAd_Slot_Abstract
         return $adAttributes;
     }
 
-    protected function _prepareAdHtmlMapping_bidgearAd($bdId, $divId)
+    protected function _prepareAdHtmlMapping_bidgearAttributes(array $adAttributes)
     {
-        return sprintf('<div bg-id="%1$d" id="%2$s-w"><div id="%2$s"></div></div>', $bdId, $divId);
-    }
-
-    protected function _prepareAdHtmlMapping_bidgearAttributes($divId, array $ad, array $adAttributes)
-    {
-        $adAttributes[] = sprintf(
-            ' data-ad-layout="bidgear" data-div-id="%s"' .
-            ' data-width="%d" data-height="%d"' .
-            ' data-script-head="%s" data-script-slot="%s"',
-            $divId,
-            $ad['ad_options']['sizeWidth'],
-            $ad['ad_options']['sizeHeight'],
-            htmlentities(bdAd_Option::get('bidgearScriptHead')),
-            htmlentities(bdAd_Option::get('bidgearScriptSlot'))
-        );
+        $scriptHead = bdAd_Option::get('bidgearScriptHead');
+        $scriptSlot = bdAd_Option::get('bidgearScriptSlot');
+        if (!empty($scriptHead) || !empty($scriptSlot)) {
+            $adAttributes[] = sprintf(
+                ' data-bidgear-script-head="%s" data-bidgear-script-slot="%s"',
+                htmlentities($scriptHead),
+                htmlentities($scriptSlot)
+            );
+        }
 
         return $adAttributes;
     }

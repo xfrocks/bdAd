@@ -30,7 +30,7 @@
 
         var adSlot = $widget.data('adSlot'),
             loaderVersion = parseInt($widget.data('loaderVersion'));
-        if (loaderVersion !== 2019102201) {
+        if (loaderVersion !== 2019102401) {
             debug('Unrecognized loader version %s', loaderVersion);
             return;
         }
@@ -123,26 +123,10 @@
     // *********************************************************************
 
     var bidgearGotScript = 0;
-    var bidgearLoader = function ($loader) {
+    var bidgearGetScripts = function ($loader) {
         var adSlot = $loader.data('adSlot'),
-            divId = $loader.data('divId'),
-            sizeWidth = $loader.data('width'),
-            sizeHeight = $loader.data('height'),
-            scriptHead = $loader.data('scriptHead'),
-            scriptSlot = $loader.data('scriptSlot');
-
-        if (!divId) {
-            debug('BidGear Slot #%d: divId is missing', adSlot);
-            return;
-        }
-        if (!sizeWidth) {
-            debug('BidGear Slot #%d: sizeWidth is missing', adSlot);
-            return;
-        }
-        if (!sizeHeight) {
-            debug('BidGear Slot #%d: sizeHeight is missing', adSlot);
-            return;
-        }
+            scriptHead = $loader.data('bidgearScriptHead'),
+            scriptSlot = $loader.data('bidgearScriptSlot');
 
         if (!scriptHead) {
             debug('BidGear Slot #%d: scriptHead is missing', adSlot);
@@ -166,12 +150,6 @@
             });
             bidgearGotScript = 1;
         }
-
-        console.log(divId);
-        var w = document.getElementById(divId + "-w");
-        console.log(w);
-
-        bidgearBgi(divId, 1, sizeWidth, sizeHeight);
     };
     var bidgearBgiQueue = [];
     var bidgearBgi = function () {
@@ -182,11 +160,28 @@
             bidgearBgiQueue.push(args);
         }
     };
+    var bidgearInitAd = function ($loader, gptUnitPath, gptSize, containerId) {
+        var match = gptUnitPath.match(/^\/bidgear\/(\d+)\/(div-.+)$/);
+        if (!match) {
+            return;
+        }
+
+        var bgId = match[1],
+            divId = match[2];
+        if (!bgId || !divId) {
+            return;
+        }
+
+        $('#' + containerId).html('<div bg-id="' + bgId + '" id="' + divId + '-w"><div id="' + divId + '"></div></div>');
+
+        bidgearGetScripts($loader);
+        bidgearBgi(divId, 1, gptSize[0], gptSize[1]);
+    };
 
     // *********************************************************************
 
     var gptGotScript = 0;
-    var gptLoader = function ($loader) {
+    var gptGetScript = function () {
         //noinspection JSUndefinedPropertyAssignment
         window.googletag = window.googletag || {};
         window.googletag.cmd = googletag.cmd || [];
@@ -204,7 +199,9 @@
             });
             gptGotScript = 1;
         }
+    };
 
+    var gptLoader = function ($loader) {
         var responsive = XenForo.isPositive($loader.data('gptResponsive'));
         if (!responsive) {
             return gptLoaderReal($loader, false);
@@ -272,6 +269,11 @@
             $container.css('height', gptSizeHeight + 'px');
         }
 
+        if (gptUnitPath.match(/^\/bidgear\//)) {
+            return bidgearInitAd($loader, gptUnitPath, gptSize, containerId);
+        }
+
+        gptGetScript();
         window.googletag.cmd.push(function () {
             //noinspection JSUnresolvedFunction
             window.googletag.defineSlot(gptUnitPath, gptSize, containerId).addService(googletag.pubads());
