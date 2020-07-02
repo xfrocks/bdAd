@@ -177,6 +177,12 @@
 
     // *********************************************************************
 
+    var htmlAd = function (containerId, html) {
+        $('#' + containerId).attr('html', html).html(html);
+    };
+
+    // *********************************************************************
+
     var gptGotScript = 0;
     var gptGetScript = function () {
         //noinspection JSUndefinedPropertyAssignment
@@ -264,6 +270,10 @@
             gptSize = [gptSizeWidth, gptSizeHeight];
             $container.css('width', gptSizeWidth + 'px');
             $container.css('height', gptSizeHeight + 'px');
+        }
+
+        if (gptUnitPath[0] === '<') {
+            return htmlAd(containerId, gptUnitPath);
         }
 
         if (gptUnitPath.match(/^\/bidgear\//)) {
