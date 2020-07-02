@@ -69,9 +69,6 @@
             case 'adsense':
                 adSenseLoader($widget);
                 break;
-            case 'bidgear':
-                bidgearLoader($widget);
-                break;
             case 'gpt':
                 gptLoader($widget);
                 break;
